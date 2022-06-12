@@ -11,10 +11,15 @@
  * else                    out[t+1] = out[t]
  */
 
+
 CHIP PC {
     IN in[16],load,inc,reset;
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+        Inc16(in=DFFOut, out=PreIncOut);
+        Mux16(a=DFFOut, b=PreIncOut, sel=inc, out=IncOut);
+        Mux16(a=IncOut, b=in, sel=load, out=LoadOut);
+        Mux16(a=LoadOut, b=false, sel=reset, out=ResetOut);
+        DFF16(in=ResetOut, out=DFFOut, out=out);
 }
