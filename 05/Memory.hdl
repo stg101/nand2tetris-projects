@@ -27,5 +27,28 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+        // Dmux(in=in, sel=address[14], a=a, b=b);
+        DMux(in=load, sel=address[14], a=RamLoad, b=PerifLoad);
+        Mux16(a=RamOut, b=PerifOut, sel=address[14], out=out);
+
+        RAM16K(in=in, load=RamLoad, address=address[0..13], out=RamOut);
+
+        Mux16(a=ScreenOut, b=KeyOut, sel=address[13], out=PerifOut);
+        DMux(in=PerifLoad, sel=address[13], a=ScreenLoad, b=KeyLoad);
+
+        Screen(in=in, load=ScreenLoad, address=address[0..12], out=ScreenOut);
+        Keyboard(out=KeyOut);
 }
+
+// 13 -> 8k
+// 14 -> 16k
+
+// 0000 0000 0000 0000
+// 0001 ...
+// 0010 ...
+// 0011 ...
+// ram ----------------- limit
+// 0100 0000 0000 0000
+// screen
+// 0101 1111 1111 1111
+// 0110 0000 0000 0000 key

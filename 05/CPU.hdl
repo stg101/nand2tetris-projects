@@ -39,5 +39,130 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+
+    Mux16(a=instruction, b=AluOut, sel=instruction[15], out=Mux1Out);
+    Not(in=instruction[15], out=NotAIns);
+    Or(a=instruction[5], b=NotAIns, out=LoadA);
+
+    ARegister(in=Mux1Out, load=LoadA, out[0..14]=addressM, out=ARegOut); // A Register You want to load the AluOut when the destination is the register A
+    PC(in=ARegOut, load=PCLoad, inc=PCInc, reset=reset, out[0..14]=pc);
+
+    And(a=instruction[4], b=instruction[15], out=LoadD);
+    DRegister(in=AluOut, load=LoadD, out=x, out=DRegOut); // D Register
+    Mux16(a=ARegOut, b=inM, sel=instruction[12], out=y, out=Mux2Out);
+    And(a=instruction[3], b=instruction[15], out=writeM);
+    ALU(
+        x=DRegOut, 
+        y=Mux2Out, 
+        zx=instruction[11], 
+        nx=instruction[10], 
+        zy=instruction[9], 
+        ny=instruction[8], 
+        f=instruction[7], 
+        no=instruction[6],
+        out=AluOut, 
+        out=outM, 
+        zr=zr, 
+        ng=ng);
+    Mux4Way16(a[0]=instruction[0], b[0]=instruction[1], c[0]=instruction[2], d[0]=false, sel[0]=zr, sel[1]=ng, out[0]=JumpOut);
+    Nand(a=JumpOut, b=instruction[15], out=PCInc);
+    And(a=JumpOut, b=instruction[15], out=PCLoad);
+
+    // Not(in=PCLoad, out=CexpInc); // what happens if is an A instruction ???
+    // Not(in=instruction[15], out=AexpInc)
+    // Or(a=CexpInc, b=AexpInc, out=PCInc);
 }
+
+
+/**
+ * 4-way 16-bit multiplexor:
+ * out = a if sel == 00     ng zr
+ *       b if sel == 01
+ *       c if sel == 10
+ *       d if sel == 11
+ */
+
+// instruction[2]       j1 1
+// instruction[1]       j2 0
+// instruction[0]       j3 0
+// j1 j2 j3                     01        10         00        11
+ // 0 0 0 null No jump          zr=1;ng=0  zr=0;ng=1 zr=0;ng=0  zr=1;ng=1
+// 0 0 1 JGT If out >  0 jump  0          0         1          x
+// 0 1 0 JEQ If out =  0 jump  1          0         0          x
+// 0 1 1 JGE If out >= 0 jump  1          0         1          x
+// 1 0 0 JLT If out <  0 jump  0          1         0          x
+// 1 0 1 JNE If out != 0 jump  0          1         1          x
+// 1 1 0 JLE If out <= 0 jump  1          1         0          x
+// 1 1 1 JMP Jump              1          1         1          x
+
+
+
+// ins[5] ins[15] loadA
+// 0      0       1         0 
+// 0      1       0         1
+// 1      0       1         0
+// 1      1       1         0
+
+// a | !b
+// ins[5] | !ins[15]
+
+
+// JumpOut ins[15] load 
+// 0       0       0
+// 0       1       0
+// 1       0       0
+// 1       1       1
+
+
+// PCLoad ins[15] inc
+// 1      0       1
+// 1      1       0
+// 0      0       1
+// 0      1       1 NAnd 
+
+// AexpInc CexpInc inc
+// 0       1       1
+// 0       0       0
+// 1       1       1
+// 1       0       1 
+
+// OR
+
+
+
+// instruction[15]      1
+// instruction[14]      1
+// instruction[13]      1
+// instruction[12]      a
+// instruction[11]      c1
+// instruction[10]      c2
+// instruction[9]       c3
+// instruction[8]       c4
+// instruction[7]       c5
+// instruction[6]       c6
+// instruction[5]       d1
+// instruction[4]       d2
+// instruction[3]       d3
+// instruction[2]       j1 1
+// instruction[1]       j2 0
+// instruction[0]       j3 0
+
+// j1 j2 j3
+// MUX ????
+// 0 0 0 null No jump          zr=1;ng=0  zr=0;ng=1 zr=0;ng=0  zr=1;ng=1
+// 0 0 1 JGT If out >  0 jump  0          0         1          x
+// 0 1 0 JEQ If out =  0 jump  1          0         0          x
+// 0 1 1 JGE If out >= 0 jump  1          0         1          x
+// 1 0 0 JLT If out <  0 jump  0          1         0          x
+// 1 0 1 JNE If out != 0 jump  0          1         1          x
+// 1 1 0 JLE If out <= 0 jump  1          1         0          x
+// 1 1 1 JMP Jump              1          1         1          x
+
+// zr, // 1 if (out == 0), 0 otherwise
+// ng; // 1 if (out < 0),  0 otherwise
+
+// Mux4Way16(a=instruction[0], b=instruction[2], c=instruction[1], d=false, sel[0]=zr, sel[1]=ng, out=);???
+
+
+
+// PC(in=ARegOut, load=, inc=, reset=reset, out=PC);
