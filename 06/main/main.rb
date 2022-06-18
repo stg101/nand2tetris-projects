@@ -9,6 +9,7 @@
 # D=D+A => D D+A => 2123123 12312424
 
 require_relative 'parser'
+require_relative 'coder'
 
 path = ARGV.first
 
@@ -16,3 +17,10 @@ file = File.open(path)
 
 parser = Parser.new(file)
 parser.parse
+
+coder = Coder.new(
+  parser.symbol_table,
+  parser.instructions
+)
+
+puts coder.code

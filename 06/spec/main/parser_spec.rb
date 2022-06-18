@@ -28,14 +28,15 @@ describe Parser do
         %w[a_instruction R1],
         %w[c_instruction D-M D JGT],
         %w[a_instruction asdf],
-        ['c_instruction', nil, '0', 'JMP'],
+        ['c_instruction', '0', nil, 'JMP'],
         %w[a_instruction ghjk],
-        ['c_instruction', nil, '0', 'JMP'],
+        ['c_instruction', '0', nil, 'JMP'],
         %w[a_instruction DDD],
-        ['c_instruction', nil, 'D', 'JGT'],
+        ['c_instruction', 'D', nil, 'JGT'],
         %w[a_instruction R2],
         %w[a_instruction R3],
-        %w[a_instruction R4]
+        %w[a_instruction R4],
+        %w[a_instruction 1000]
       ]
 
       expect(instance.instructions).to eq(

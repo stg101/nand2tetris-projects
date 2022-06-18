@@ -95,7 +95,13 @@ class Parser
 
   def parse_c_instruction(str)
     assignment, jump = str.split(';')
-    destination, operation = assignment.split('=')
+    assignment_arr = assignment.split('=')
+
+    if assignment_arr.length == 1
+      operation = assignment_arr[0]
+    else
+      destination, operation = assignment_arr
+    end
 
     [C_INSTRUCTION, operation, destination, jump]
   end
