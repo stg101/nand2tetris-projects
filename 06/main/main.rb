@@ -8,19 +8,8 @@
 
 # D=D+A => D D+A => 2123123 12312424
 
-require_relative 'parser'
-require_relative 'coder'
+require_relative 'assembler'
 
 path = ARGV.first
 
-file = File.open(path)
-
-parser = Parser.new(file)
-parser.parse
-
-coder = Coder.new(
-  parser.symbol_table,
-  parser.instructions
-)
-
-puts coder.code
+puts Assembler.new(path).assemble
