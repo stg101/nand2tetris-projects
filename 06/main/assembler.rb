@@ -1,8 +1,6 @@
 require_relative 'parser'
 require_relative 'coder'
 
-path = ARGV.first
-
 class Assembler
   attr_reader :file
 

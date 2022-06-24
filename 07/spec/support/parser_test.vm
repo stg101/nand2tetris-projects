@@ -1,0 +1,12 @@
+/////
+
+// asd
+
+// xxxxxxxx
+
+push constant 111
+pop static 8
+push static 1
+sub
+push static 8
+add
