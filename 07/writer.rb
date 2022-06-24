@@ -48,7 +48,7 @@ class Writer
   def write_lines(lines)
     File.open(output_path, 'a') do |f|
       lines.each do |l|
-        f.write l
+        f.write "#{l}\n"
       end
     end
   end
