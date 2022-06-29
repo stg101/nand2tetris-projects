@@ -10,7 +10,7 @@ module ArithmeticTransformer
   end
 
   def sub_template
-    operation_helper('D-M')
+    operation_helper('M-D')
   end
 
   def and_template
