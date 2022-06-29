@@ -58,7 +58,7 @@ module ArithmeticTransformer
      'A=M',  # 12
      'M=0',  # 13
      "@#{asm_counter + 19}", # 14
-     "D;#{asm_op}", # 15
+     '0;JMP', # 15
      '@SP',  # 16
      'A=M',  # 17
      'M=-1', # 18
