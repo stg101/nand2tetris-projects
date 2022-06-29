@@ -18,7 +18,7 @@ module StackOpsTransformer
     seg_val2 = [*seg_val, "@#{value}", 'A=D+A', 'D=M']
     seg_val2 = ["@#{value}", 'D=A'] if segment == 'constant'
     seg_val2 = ["@#{STATIC_PREFIX}.#{value}", 'D=M'] if segment == 'static'
-    seg_val2 = ["@#{value == 0 ? 'THIS' : 'THAT'}", 'D=M'] if segment == 'pointer'
+    seg_val2 = ["@#{value == '0' ? 'THIS' : 'THAT'}", 'D=M'] if segment == 'pointer'
 
     [*seg_val2,
      '@SP',
@@ -50,7 +50,7 @@ module StackOpsTransformer
       return ['@SP',
               'A=M-1',
               'D=M',
-              "@#{value == 0 ? 'THIS' : 'THAT'}",
+              "@#{value == '0' ? 'THIS' : 'THAT'}",
               'M=D',
               '@SP',
               'M=M-1']
