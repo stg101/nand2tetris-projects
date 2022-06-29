@@ -7,6 +7,7 @@ module StackOpsTransformer
   }
 
   TEMP_BASE_ADDR = 5
+  STATIC_PREFIX = 'static'
 
   def transform_push(instr)
     _op, segment, value = instr
@@ -16,6 +17,7 @@ module StackOpsTransformer
 
     seg_val2 = [*seg_val, "@#{value}", 'A=D+A', 'D=M']
     seg_val2 = ["@#{value}", 'D=A'] if segment == 'constant'
+    seg_val2 = ["@#{STATIC_PREFIX}.#{value}", 'D=M'] if segment == 'static'
 
     [*seg_val2,
      '@SP',
@@ -30,6 +32,17 @@ module StackOpsTransformer
 
     seg_val = ["@#{SEGMENT_MAPPING[segment]}", 'D=M'] if SEGMENT_MAPPING.key? segment
     seg_val = ["@#{TEMP_BASE_ADDR}", 'D=A'] if segment == 'temp'
+
+    if segment == 'static'
+
+      return ['@SP',
+              'A=M-1',
+              'D=M',
+              "@#{STATIC_PREFIX}.#{value}",
+              'M=D',
+              '@SP',
+              'M=M-1']
+    end
 
     [
       *seg_val,
@@ -53,6 +66,26 @@ end
 # ARG: 2,
 # THIS: 3,
 # THAT: 4,
+
+# pop static 5
+
+# @SP
+# A=M-1
+# D=M
+# @PointerTest.5
+# M=D
+# @SP
+# M=M-1
+
+# push static 5
+
+# @PointerTest.5
+# D=M
+# @SP
+# A=M
+# M=D
+# @SP
+# M=M+1
 
 # # pop temp 7
 # @5
