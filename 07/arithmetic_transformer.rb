@@ -52,7 +52,7 @@ module ArithmeticTransformer
      'M=M-1',
      'A=M',
      'D=D-M',
-     "@#{asm_counter + 13}",
+     "@#{asm_counter + 14}",
      "D;#{asm_op}",
      '@SP',
      'A=M',
