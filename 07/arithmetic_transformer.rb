@@ -55,8 +55,10 @@ module ArithmeticTransformer
      "@#{asm_counter + 13}",
      "D;#{asm_op}",
      '@SP',
+     'A=M',
      'M=0',
      '@SP',
+     'A=M',
      'M=-1',
      '@SP',
      'M=M+1']
