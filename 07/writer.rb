@@ -2,7 +2,7 @@ require_relative 'arithmetic_transformer'
 require_relative 'stack_ops_transformer'
 
 class Writer
-  attr_accessor :content, :output_path, :asm_lines
+  attr_accessor :content, :output_path, :asm_lines, :pure_asm_lines
 
   include ArithmeticTransformer
   include StackOpsTransformer
@@ -24,6 +24,7 @@ class Writer
   def initialize(output_path)
     @output_path = output_path
     @asm_lines = []
+    @pure_asm_lines = []
   end
 
   def process(instr)
@@ -31,7 +32,17 @@ class Writer
     transformer_name = build_transformer_name(instr_type)
 
     @asm_lines << "// #{instr.join(' ')}"
-    @asm_lines.concat(send(transformer_name, instr))
+    new_asm_lines = send(transformer_name, instr)
+    @asm_lines.concat(with_line_numbers(new_asm_lines))
+    @pure_asm_lines.concat(new_asm_lines)
+  end
+
+  def with_line_numbers(lines)
+    lines.map.with_index { |l, i| "#{l} //    #{asm_counter + 1 + i}" }
+  end
+
+  def asm_counter
+    pure_asm_lines.length - 1
   end
 
   def build_file
