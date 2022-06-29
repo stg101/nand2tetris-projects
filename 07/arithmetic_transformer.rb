@@ -44,24 +44,26 @@ module ArithmeticTransformer
   private
 
   def compare_helper(asm_op)
-    ['@SP',
-     'M=M-1',
-     'A=M',
-     'D=M',
-     '@SP',
-     'M=M-1',
-     'A=M',
-     'D=D-M',
-     "@#{asm_counter + 14}",
-     "D;#{asm_op}",
-     '@SP',
-     'A=M',
-     'M=0',
-     '@SP',
-     'A=M',
-     'M=-1',
-     '@SP',
-     'M=M+1']
+    ['@SP',  # 1
+     'M=M-1', # 2
+     'A=M',  # 3
+     'D=M',  # 4
+     '@SP',  # 5
+     'M=M-1', # 6
+     'A=M', # 7
+     'D=D-M', # 8
+     "@#{asm_counter + 16}", # 9
+     "D;#{asm_op}", # 10
+     '@SP',  # 11
+     'A=M',  # 12
+     'M=0',  # 13
+     "@#{asm_counter + 19}", # 14
+     "D;#{asm_op}", # 15
+     '@SP',  # 16
+     'A=M',  # 17
+     'M=-1', # 18
+     '@SP', # 19
+     'M=M+1']  # 20
   end
 
   def operation_helper(asm_op)
