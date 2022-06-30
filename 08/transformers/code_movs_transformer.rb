@@ -9,7 +9,8 @@ module CodeMovsTransformer
 
   def transform_if(instr)
     ['@SP',
-     'A=M-1',
+     'M=M-1',
+     'A=M',
      'D=M',
      "@#{instr[1]}",
      'D;JNE']
