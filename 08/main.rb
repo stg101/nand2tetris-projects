@@ -5,4 +5,4 @@ path = ARGV.first
 FileTranslator.new(path).translate
 
 
-# ruby main.rb ./spec/support/gradding_tests/StackArithmetic/SimpleAdd/SimpleAdd.vm
+# ruby main.rb ./files/ProgramFlow/BasicLoop/BasicLoop.vm

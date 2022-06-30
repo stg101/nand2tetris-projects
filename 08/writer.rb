@@ -1,11 +1,13 @@
-require_relative 'arithmetic_transformer'
-require_relative 'stack_ops_transformer'
+require_relative 'transformers/arithmetic_transformer'
+require_relative 'transformers/stack_ops_transformer'
+require_relative 'transformers/code_movs_transformer'
 
 class Writer
   attr_accessor :content, :output_path, :asm_lines, :pure_asm_lines
 
   include ArithmeticTransformer
   include StackOpsTransformer
+  include CodeMovsTransformer
 
   COMMAND_TYPES = {
     'add' => 'C_ARITHMETIC',
@@ -18,7 +20,13 @@ class Writer
     'or' => 'C_ARITHMETIC',
     'not' => 'C_ARITHMETIC',
     'push' => 'C_PUSH',
-    'pop' => 'C_POP'
+    'pop' => 'C_POP',
+    'label' => 'C_LABEL',
+    'goto' => 'C_GOTO',
+    'if-goto' => 'C_IF',
+    'function' => 'C_FUNCTION',
+    'return' => 'C_RETURN',
+    'call' => 'C_CALL'
   }
 
   def initialize(output_path)
