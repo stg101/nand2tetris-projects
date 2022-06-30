@@ -7,18 +7,19 @@ module CodeMovsTransformer
     []
   end
 
-  def transform_if(_instr)
+  def transform_if(instr)
     ['@SP',
      'A=M-1',
-     'D=M+1',
-     '@LOOP_START',
-     'D;JEQ']
+     'D=M',
+     "@#{instr[1]}",
+     'D;JNE']
   end
 end
 
 # if-goto LOOP_START
-# "@SP",
-# "A=M-1",
-# "D=M+1",
-# "@LOOP_START",
-# "D;JEQ",
+
+# ['@SP',
+#   'A=M-1',
+#   'D=M',
+#   '@LOOP_START',
+#   'D;JNE']

@@ -130,9 +130,9 @@ M=M+1 //    116
 // if-goto LOOP_START
 @SP //    117
 A=M-1 //    118
-D=M+1 //    119
+D=M //    119
 @LOOP_START //    120
-D;JEQ //    121
+D;JNE //    121
 // push local 0
 @LCL //    122
 D=M //    123
