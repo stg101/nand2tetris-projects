@@ -3,8 +3,8 @@ module CodeMovsTransformer
     ["(#{instr[1]})"]
   end
 
-  def transform_goto(_instr)
-    []
+  def transform_goto(instr)
+    ["@#{instr[1]}", '0;JMP']
   end
 
   def transform_if(instr)
