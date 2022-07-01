@@ -1,13 +1,15 @@
 require_relative 'transformers/arithmetic_transformer'
 require_relative 'transformers/stack_ops_transformer'
 require_relative 'transformers/code_movs_transformer'
+require_relative 'transformers/function_ops_transformer'
 
 class Writer
-  attr_accessor :content, :output_path, :asm_lines, :pure_asm_lines
+  attr_accessor :content, :output_path, :asm_lines, :pure_asm_lines, :file_name
 
   include ArithmeticTransformer
   include StackOpsTransformer
   include CodeMovsTransformer
+  include FuncionOpsTransformer
 
   COMMAND_TYPES = {
     'add' => 'C_ARITHMETIC',
@@ -30,6 +32,7 @@ class Writer
   }
 
   def initialize(output_path)
+    @file_name = extract_file_name(output_path)
     @output_path = output_path
     @asm_lines = []
     @pure_asm_lines = []
@@ -59,6 +62,10 @@ class Writer
   end
 
   private
+
+  def extract_file_name(path)
+    path.split("/").last.split(".").first
+  end
 
   def clear_file
     File.open(output_path, 'w') { |f| f.write '' }
