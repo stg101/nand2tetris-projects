@@ -60,11 +60,11 @@ module FuncionOpsTransformer
   end
 
   def pseudo_add(symbol, value)
-    ["@#{value}", 'D=A', "@#{symbol}", 'D=D+A']
+    ["@#{value}", 'D=A', "@#{symbol}", 'D=D+M']
   end
 
   def pseudo_sub(symbol, value)
-    ["@#{value}", 'D=A', "@#{symbol}", 'D=A-D']
+    ["@#{value}", 'D=A', "@#{symbol}", 'D=M-D']
   end
 
   def pseudo_assign(left, right)
