@@ -39,9 +39,9 @@ module FuncionOpsTransformer
       *pseudo_add('ARG', '1'),
       *pseudo_assign('SP', 'D'),
       *pseudo_sub_redirect_assign('endFrame', '1', 'THAT'),
-      *pseudo_sub_redirect_assign('endFrame', '2', 'THAT'),
-      *pseudo_sub_redirect_assign('endFrame', '3', 'THAT'),
-      *pseudo_sub_redirect_assign('endFrame', '4', 'THAT'),
+      *pseudo_sub_redirect_assign('endFrame', '2', 'THIS'),
+      *pseudo_sub_redirect_assign('endFrame', '3', 'ARG'),
+      *pseudo_sub_redirect_assign('endFrame', '4', 'LCL'),
       *transform_goto(%w[goto retAddr])
     ]
   end
