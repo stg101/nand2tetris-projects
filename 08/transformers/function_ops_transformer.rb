@@ -42,7 +42,7 @@ module FuncionOpsTransformer
       *pseudo_sub_redirect_assign('endFrame', '2', 'THIS'),
       *pseudo_sub_redirect_assign('endFrame', '3', 'ARG'),
       *pseudo_sub_redirect_assign('endFrame', '4', 'LCL'),
-      *transform_goto(%w[goto retAddr])
+      '@retAddr', 'A=M', '0;JMP'
     ]
   end
 
