@@ -30,16 +30,20 @@ module FuncionOpsTransformer
   end
 
   def transform_return(_instr)
-    [*pseudo_assign('endFrame', 'LCL'),
-     *pseudo_sub_redirect_assign('endFrame', '5', 'retAddr'),
-     *transform_pop(%w[pop argument 0]),
-     *pseudo_add('ARG', '1'),
-     *pseudo_assign('SP', 'D'),
-     *pseudo_sub_redirect_assign('endFrame', '1', 'THAT'),
-     *pseudo_sub_redirect_assign('endFrame', '2', 'THAT'),
-     *pseudo_sub_redirect_assign('endFrame', '3', 'THAT'),
-     *pseudo_sub_redirect_assign('endFrame', '4', 'THAT'),
-     *transform_goto(%w[goto retAddr])]
+    [
+      '@LCL',
+      'D=M',
+      *pseudo_assign('endFrame', 'D'),
+      *pseudo_sub_redirect_assign('endFrame', '5', 'retAddr'),
+      *transform_pop(%w[pop argument 0]),
+      *pseudo_add('ARG', '1'),
+      *pseudo_assign('SP', 'D'),
+      *pseudo_sub_redirect_assign('endFrame', '1', 'THAT'),
+      *pseudo_sub_redirect_assign('endFrame', '2', 'THAT'),
+      *pseudo_sub_redirect_assign('endFrame', '3', 'THAT'),
+      *pseudo_sub_redirect_assign('endFrame', '4', 'THAT'),
+      *transform_goto(%w[goto retAddr])
+    ]
   end
 
   private
