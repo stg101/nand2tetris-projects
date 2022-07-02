@@ -4,7 +4,7 @@ require_relative 'transformers/code_movs_transformer'
 require_relative 'transformers/function_ops_transformer'
 
 class Writer
-  attr_accessor :content, :output_path, :asm_lines, :pure_asm_lines, :input_path
+  attr_accessor :content, :output_path, :asm_lines, :input_path, :asm_counter
 
   include ArithmeticTransformer
   include StackOpsTransformer
@@ -36,6 +36,7 @@ class Writer
     @output_path = output_path
     @asm_lines = []
     @pure_asm_lines = []
+    @asm_counter = -1
   end
 
   def process(instr)
@@ -44,16 +45,18 @@ class Writer
 
     @asm_lines << "// #{instr.join(' ')}"
     new_asm_lines = send(transformer_name, instr)
-    @asm_lines.concat(with_line_numbers(new_asm_lines))
-    @pure_asm_lines.concat(new_asm_lines)
+    fill_asm_lines(new_asm_lines)
   end
 
-  def with_line_numbers(lines)
-    lines.map.with_index { |l, i| "#{l} //    #{asm_counter + 1 + i}" }
-  end
+  def fill_asm_lines(lines)
+    lines_with_numbers = lines.map do |l|
+      next l if label_line? l
 
-  def asm_counter
-    pure_asm_lines.length - 1
+      @asm_counter += 1
+      "#{l} //    #{asm_counter}"
+    end
+
+    @asm_lines.concat(lines_with_numbers)
   end
 
   def build_file
@@ -62,6 +65,10 @@ class Writer
   end
 
   private
+
+  def label_line?(line)
+    line[0] == '(' && line[-1] == ')'
+  end
 
   def file_name
     input_path.split('/').last.split('.').first
