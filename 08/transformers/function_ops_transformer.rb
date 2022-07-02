@@ -5,22 +5,21 @@ module FuncionOpsTransformer
   include StackOpsTransformer
   include CodeMovsTransformer
 
-  #   vm : function SimpleFunction.test 2
   def transform_function(instr)
     push_count = instr[2].to_i
     result = []
     push_count.times { result << transform_push(%w[push constant 0]) }
 
-    [*transform_label(['label', function_label(instr[1])]), *result.flatten]
+    [*transform_label(['label', instr[1]]), *result.flatten]
   end
 
-  def transform_call(instr) ## TODO : Complete impl
+  def transform_call(instr)
     func_name = instr[1]
     n_args = instr[2]
     @call_counter ||= {}
     @call_counter[func_name] = (@call_counter[func_name] || -1) + 1
 
-    label = "#{file_name}.#{func_name}$ret.#{@call_counter[func_name]}"
+    label = "#{func_name}$ret.#{@call_counter[func_name]}"
 
     [*push_symbol(label),
      *push_symbol('LCL'),
@@ -32,7 +31,7 @@ module FuncionOpsTransformer
      *pseudo_sub('temp_diff', n_args),
      *pseudo_assign('ARG', 'D'),
      *pseudo_assign_symbol('LCL', 'SP'),
-     *transform_goto(['goto', function_label(func_name)]),
+     *transform_goto(['goto', func_name]),
      *transform_label(['label', label])]
   end
 
@@ -54,10 +53,6 @@ module FuncionOpsTransformer
   end
 
   private
-
-  def function_label(func_name)
-    "#{file_name}.#{func_name}"
-  end
 
   def pseudo_sub_redirect_assign(input, val, output)
     [*pseudo_sub(input, val),

@@ -1,5 +1,5 @@
 // function Sys.init 0
-(Sys.Sys.init) //    0
+(Sys.init) //    0
 // push constant 4
 @4 //    1
 D=A //    2
@@ -9,7 +9,7 @@ M=D //    5
 @SP //    6
 M=M+1 //    7
 // call Main.fibonacci 1
-@Sys.Main.fibonacci$ret.0 //    8
+@Main.fibonacci$ret.0 //    8
 D=M //    9
 @SP //    10
 A=M //    11
@@ -60,16 +60,16 @@ M=D //    54
 D=M //    56
 @LCL //    57
 M=D //    58
-@Sys.Main.fibonacci //    59
+@Main.fibonacci //    59
 0;JMP //    60
-(Sys.Main.fibonacci$ret.0) //    61
+(Main.fibonacci$ret.0) //    61
 // label WHILE
 (WHILE) //    62
 // goto WHILE
 @WHILE //    63
 0;JMP //    64
 // function Main.fibonacci 0
-(Main.Main.fibonacci) //    65
+(Main.fibonacci) //    65
 // push argument 0
 @ARG //    66
 D=M //    67
@@ -234,7 +234,7 @@ M=M-D //    214
 @SP //    215
 M=M+1 //    216
 // call Main.fibonacci 1
-@Main.Main.fibonacci$ret.1 //    217
+@Main.fibonacci$ret.1 //    217
 D=M //    218
 @SP //    219
 A=M //    220
@@ -285,9 +285,9 @@ M=D //    263
 D=M //    265
 @LCL //    266
 M=D //    267
-@Main.Main.fibonacci //    268
+@Main.fibonacci //    268
 0;JMP //    269
-(Main.Main.fibonacci$ret.1) //    270
+(Main.fibonacci$ret.1) //    270
 // push argument 0
 @ARG //    271
 D=M //    272
@@ -319,7 +319,7 @@ M=M-D //    295
 @SP //    296
 M=M+1 //    297
 // call Main.fibonacci 1
-@Main.Main.fibonacci$ret.2 //    298
+@Main.fibonacci$ret.2 //    298
 D=M //    299
 @SP //    300
 A=M //    301
@@ -370,9 +370,9 @@ M=D //    344
 D=M //    346
 @LCL //    347
 M=D //    348
-@Main.Main.fibonacci //    349
+@Main.fibonacci //    349
 0;JMP //    350
-(Main.Main.fibonacci$ret.2) //    351
+(Main.fibonacci$ret.2) //    351
 // add
 @SP //    352
 M=M-1 //    353
