@@ -39,10 +39,14 @@ class FileTranslator
     elsif is_dir
       @output_path = "#{path}/#{path.split('/').last}.asm"
 
-      Dir
-        .glob("#{path}/*")
-        .select { |e| File.file?(e) && e.end_with?('.vm') }
-        .map { |p| Parser.new(File.open(p)) }
+      file_paths = Dir
+                   .glob("#{path}/*")
+                   .select { |e| File.file?(e) && e.end_with?('.vm') }
+
+      sys_path = file_paths.find { |p| p.end_with?('Sys.vm') }
+      file_paths.delete_if { |p| p.end_with?('Sys.vm') }
+      file_paths.unshift(sys_path)
+      file_paths.map { |p| Parser.new(File.open(p)) }
     end
   end
 end
