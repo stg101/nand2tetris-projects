@@ -16,17 +16,19 @@ module FuncionOpsTransformer
   end
 
   def transform_call(_instr) ## TODO : Complete impl
-    @function_counter ||= {}
-    func_name = instr[1]
-    @call_counter[func_name] = (@call_counter[func_name] || -1) + 1
+    # @function_counter ||= {}
+    # func_name = instr[1]
+    # @call_counter[func_name] = (@call_counter[func_name] || -1) + 1
 
-    label = "#{file_name}.#{func_name}$ret.#{@call_counter[func_name]}"
+    # label = "#{file_name}.#{func_name}$ret.#{@call_counter[func_name]}"
 
-    [*transform_push(%w[push constant LCL]),
-     *transform_push(%w[push constant ARG]),
-     *transform_push(%w[push constant THIS]),
-     *transform_push(%w[push constant THAT]),
-     *transform_label(['label', label])]
+    # [*transform_push(%w[push constant LCL]),
+    #  *transform_push(%w[push constant ARG]),
+    #  *transform_push(%w[push constant THIS]),
+    #  *transform_push(%w[push constant THAT]),
+    #  *transform_label(['label', label])]
+
+    []
   end
 
   def transform_return(_instr)

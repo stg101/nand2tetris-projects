@@ -4,7 +4,7 @@ require_relative 'transformers/code_movs_transformer'
 require_relative 'transformers/function_ops_transformer'
 
 class Writer
-  attr_accessor :content, :output_path, :asm_lines, :pure_asm_lines, :file_name
+  attr_accessor :content, :output_path, :asm_lines, :pure_asm_lines, :input_path
 
   include ArithmeticTransformer
   include StackOpsTransformer
@@ -31,8 +31,8 @@ class Writer
     'call' => 'C_CALL'
   }
 
-  def initialize(output_path)
-    @file_name = extract_file_name(output_path)
+  def initialize(output_path, input_path = '')
+    @input_path = input_path
     @output_path = output_path
     @asm_lines = []
     @pure_asm_lines = []
@@ -63,8 +63,8 @@ class Writer
 
   private
 
-  def extract_file_name(path)
-    path.split("/").last.split(".").first
+  def file_name
+    input_path.split('/').last.split('.').first
   end
 
   def clear_file

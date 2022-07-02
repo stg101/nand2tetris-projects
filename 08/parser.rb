@@ -1,7 +1,8 @@
 class Parser
-  attr_accessor :content, :cursor
+  attr_accessor :content, :cursor, :file_path
 
   def initialize(file)
+    @file_path = file.path
     @content = clean(file.readlines)
     @cursor = 0
   end
