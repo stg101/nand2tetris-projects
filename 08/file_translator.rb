@@ -37,7 +37,7 @@ class FileTranslator
 
       [Parser.new(file)]
     elsif is_dir
-      @output_path = "#{path}/Main.asm"
+      @output_path = "#{path}/#{path.split('/').last}.asm"
 
       Dir
         .glob("#{path}/*")
