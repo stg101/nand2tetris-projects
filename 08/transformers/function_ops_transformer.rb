@@ -11,9 +11,7 @@ module FuncionOpsTransformer
     result = []
     push_count.times { result << transform_push(%w[push constant 0]) }
 
-    func_name = instr[1]
-    label = "#{file_name}.#{func_name}"
-    [*transform_label(['label', label]), *result.flatten]
+    [*transform_label(['label', function_label(instr[1])]), *result.flatten]
   end
 
   def transform_call(instr) ## TODO : Complete impl
@@ -34,6 +32,7 @@ module FuncionOpsTransformer
      *pseudo_sub('temp_diff', n_args),
      *pseudo_assign('ARG', 'D'),
      *pseudo_assign_symbol('LCL', 'SP'),
+     *transform_goto(['goto', function_label(func_name)]),
      *transform_label(['label', label])]
   end
 
@@ -55,6 +54,10 @@ module FuncionOpsTransformer
   end
 
   private
+
+  def function_label(func_name)
+    "#{file_name}.#{func_name}"
+  end
 
   def pseudo_sub_redirect_assign(input, val, output)
     [*pseudo_sub(input, val),
