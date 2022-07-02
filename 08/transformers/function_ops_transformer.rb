@@ -9,26 +9,32 @@ module FuncionOpsTransformer
   def transform_function(instr)
     push_count = instr[2].to_i
     result = []
-
     push_count.times { result << transform_push(%w[push constant 0]) }
 
-    result.flatten
+    func_name = instr[1]
+    label = "#{file_name}.#{func_name}"
+    [*transform_label(['label', label]), *result.flatten]
   end
 
-  def transform_call(_instr) ## TODO : Complete impl
-    # @function_counter ||= {}
-    # func_name = instr[1]
-    # @call_counter[func_name] = (@call_counter[func_name] || -1) + 1
+  def transform_call(instr) ## TODO : Complete impl
+    func_name = instr[1]
+    n_args = instr[2]
+    @call_counter ||= {}
+    @call_counter[func_name] = (@call_counter[func_name] || -1) + 1
 
-    # label = "#{file_name}.#{func_name}$ret.#{@call_counter[func_name]}"
+    label = "#{file_name}.#{func_name}$ret.#{@call_counter[func_name]}"
 
-    # [*transform_push(%w[push constant LCL]),
-    #  *transform_push(%w[push constant ARG]),
-    #  *transform_push(%w[push constant THIS]),
-    #  *transform_push(%w[push constant THAT]),
-    #  *transform_label(['label', label])]
-
-    []
+    [*push_symbol(label),
+     *push_symbol('LCL'),
+     *push_symbol('ARG'),
+     *push_symbol('THIS'),
+     *push_symbol('THAT'),
+     *pseudo_sub('SP', '5'),
+     *pseudo_assign('temp_diff', 'D'),
+     *pseudo_sub('temp_diff', n_args),
+     *pseudo_assign('ARG', 'D'),
+     *pseudo_assign_symbol('LCL', 'SP'),
+     *transform_label(['label', label])]
   end
 
   def transform_return(_instr)
@@ -71,5 +77,24 @@ module FuncionOpsTransformer
 
   def pseudo_assign(left, right)
     ["@#{left}", "M=#{right}"]
+  end
+
+  def pseudo_assign_symbol(left, right)
+    ["@#{right}",
+     'D=M',
+     "@#{left}",
+     'M=D']
+  end
+
+  def push_symbol(symbol)
+    [
+      "@#{symbol}",
+      'D=M',
+      '@SP',
+      'A=M',
+      'M=D',
+      '@SP',
+      'M=M+1'
+    ]
   end
 end
