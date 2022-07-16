@@ -2,7 +2,7 @@ require_relative 'parser'
 require_relative 'writer'
 
 class FileTranslator
-  attr_accessor :file, :parsers, :writer, :output_path
+  attr_accessor :file, :parsers, :writer, :output_path, :is_dir
 
   def initialize(path)
     @parsers = build_parsers(path)
@@ -10,6 +10,8 @@ class FileTranslator
   end
 
   def translate
+    writer.load_bootstrap_code if is_dir
+
     parsers.each do |parser|
       writer.input_path = parser.file_path
 
@@ -25,8 +27,8 @@ class FileTranslator
   private
 
   def build_parsers(path)
-    is_dir = File.directory?(path)
-    is_file = File.file?(path)
+    @is_dir = File.directory?(path)
+    is_file = !@is_dir
 
     if is_file
       raise 'invalid file typle' unless path.end_with? '.vm'

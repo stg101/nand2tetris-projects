@@ -39,6 +39,18 @@ class Writer
     @asm_counter = -1
   end
 
+  def load_bootstrap_code
+    code = [
+      *set_ram('SP', 256),
+      *set_ram('LCL', 256),
+      *set_ram('ARG', 256),
+      *transform_call(['call', 'Sys.init', '0'])
+    ]
+
+    @asm_lines << "// BOOTSTRAP CODE"
+    fill_asm_lines(code)
+  end
+
   def process(instr)
     instr_type = extract_type(instr)
     transformer_name = build_transformer_name(instr_type)
@@ -65,6 +77,10 @@ class Writer
   end
 
   private
+
+  def set_ram(symbol, value)
+    ["@#{value}", 'D=A', "@#{symbol}", 'M=D']
+  end
 
   def label_line?(line)
     line[0] == '(' && line[-1] == ')'
