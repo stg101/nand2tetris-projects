@@ -371,7 +371,7 @@ M=M+1 //    344
 @SP //    345
 A=M-1 //    346
 D=M //    347
-@static.0 //    348
+@Class1.0 //    348
 M=D //    349
 @SP //    350
 M=M-1 //    351
@@ -390,7 +390,7 @@ M=M+1 //    361
 @SP //    362
 A=M-1 //    363
 D=M //    364
-@static.1 //    365
+@Class1.1 //    365
 M=D //    366
 @SP //    367
 M=M-1 //    368
@@ -473,7 +473,7 @@ A=M //    441
 // function Class1.get 0
 (Class1.get)
 // push static 0
-@static.0 //    443
+@Class1.0 //    443
 D=M //    444
 @SP //    445
 A=M //    446
@@ -481,7 +481,7 @@ M=D //    447
 @SP //    448
 M=M+1 //    449
 // push static 1
-@static.1 //    450
+@Class1.1 //    450
 D=M //    451
 @SP //    452
 A=M //    453
@@ -584,7 +584,7 @@ M=M+1 //    543
 @SP //    544
 A=M-1 //    545
 D=M //    546
-@static.0 //    547
+@Class2.0 //    547
 M=D //    548
 @SP //    549
 M=M-1 //    550
@@ -603,7 +603,7 @@ M=M+1 //    560
 @SP //    561
 A=M-1 //    562
 D=M //    563
-@static.1 //    564
+@Class2.1 //    564
 M=D //    565
 @SP //    566
 M=M-1 //    567
@@ -686,7 +686,7 @@ A=M //    640
 // function Class2.get 0
 (Class2.get)
 // push static 0
-@static.0 //    642
+@Class2.0 //    642
 D=M //    643
 @SP //    644
 A=M //    645
@@ -694,7 +694,7 @@ M=D //    646
 @SP //    647
 M=M+1 //    648
 // push static 1
-@static.1 //    649
+@Class2.1 //    649
 D=M //    650
 @SP //    651
 A=M //    652
