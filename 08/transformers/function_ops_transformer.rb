@@ -21,7 +21,7 @@ module FuncionOpsTransformer
 
     label = "#{func_name}$ret.#{@call_counter[func_name]}"
 
-    [*push_symbol(label),
+    [*push_label(label),
      *push_symbol('LCL'),
      *push_symbol('ARG'),
      *push_symbol('THIS'),
@@ -88,6 +88,18 @@ module FuncionOpsTransformer
     [
       "@#{symbol}",
       'D=M',
+      '@SP',
+      'A=M',
+      'M=D',
+      '@SP',
+      'M=M+1'
+    ]
+  end
+
+  def push_label(label)
+    [
+      "@#{label}",
+      'D=A',
       '@SP',
       'A=M',
       'M=D',

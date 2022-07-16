@@ -12,7 +12,7 @@ D=A //    9
 @ARG //    10
 M=D //    11
 @Sys.init$ret.0 //    12
-D=M //    13
+D=A //    13
 @SP //    14
 A=M //    15
 M=D //    16
@@ -77,7 +77,7 @@ M=D //    69
 M=M+1 //    71
 // call Main.fibonacci 1
 @Main.fibonacci$ret.0 //    72
-D=M //    73
+D=A //    73
 @SP //    74
 A=M //    75
 M=D //    76
@@ -302,7 +302,7 @@ M=M-D //    273
 M=M+1 //    275
 // call Main.fibonacci 1
 @Main.fibonacci$ret.1 //    276
-D=M //    277
+D=A //    277
 @SP //    278
 A=M //    279
 M=D //    280
@@ -387,7 +387,7 @@ M=M-D //    353
 M=M+1 //    355
 // call Main.fibonacci 1
 @Main.fibonacci$ret.2 //    356
-D=M //    357
+D=A //    357
 @SP //    358
 A=M //    359
 M=D //    360
