@@ -2,39 +2,46 @@ require 'yaml'
 
 module Jack
   class Tokenizer
-    attr_accessor :file, :current_str, :last_match, :token_stack, :grammar
+    attr_accessor :file, :current_str, :last_match, :token_stack, :grammar, :state
+    attr_reader :rules
 
     def initialize(file, grammar_file)
       @file = file
       @grammar = YAML.safe_load(grammar_file, symbolize_names: true)
-
-      # @char_stack = []
+      @rules = build_rules(grammar)
+      @state = "keep_chars"
 
       @current_str = ''
       @token_stack = []
       @last_match = {}
-
-      # pp @grammar
-      # @code_lines = PreProcessor.new(file)
     end
 
     def advance
       return if finished?
 
-      # self.current_str += file.readchar
       current_char = file.readchar
       self.current_str += current_char
       match = match_rules(current_str)
 
       if !last_match[:rule].nil? && match[:rule].nil?
-        token_stack << last_match
+        token_stack << last_match if !last_match[:rule].include?("comment")
         match = match_rules(current_char)
         self.current_str = current_char
       end
 
-      self.current_str = '' if [' ', "\n", "\r"].include?(current_char)
+      if ["inline_comment"].include?(match[:rule])
+        self.current_str = '' if ["\n", "\r"].include?(current_char)
+      elsif match[:rule] == "block_comment"
+        self.current_str = ''
+      elsif !["block_comment", "half_block_comment"].include?(match[:rule])
+        self.current_str = '' if [" ", "\n", "\r"].include?(current_char)
+      end
 
       self.last_match = match
+
+      if finished? && !last_match[:rule].nil?
+        token_stack << last_match
+      end
     end
 
     def finished?
@@ -47,9 +54,29 @@ module Jack
 
     private
 
-    def match_rules(str)
-      rules = grammar[:rules]
+    def build_rules(grammar)
+      comment_grammar = grammar[:comments]
+      inline = comment_grammar[:inline]
+      block_start = Regexp.escape(comment_grammar[:block][0])
+      block_end = Regexp.escape(comment_grammar[:block][1])
 
+      comment_rules = [{
+        name: 'inline_comment',
+        match: "^#{inline}([^\n]*)$"
+      }, {
+        name: 'block_comment',
+        match: "^#{block_start}((.|\n)*)#{block_end}$"
+      },
+      {
+        name: 'half_block_comment',
+        match: "^#{block_start}((.|\n)*)$"
+      }
+    ]
+
+      grammar[:rules].concat(comment_rules)
+    end
+
+    def match_rules(str)
       matched_rule = rules.find do |rule|
         matcher = rule[:match]
 
@@ -67,7 +94,3 @@ module Jack
     end
   end
 end
-
-# rule matched
-# cuando cambia el rule matched a no matched o new match
-# the property to expoit is that every token has specific start and end

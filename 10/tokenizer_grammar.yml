@@ -1,6 +1,6 @@
 comments:
   inline: '//'
-  block: ['/**', '*/']
+  block: ['/*', '*/']
 
 rules:
   - name: keyword
