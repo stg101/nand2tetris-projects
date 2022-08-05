@@ -9,7 +9,7 @@ module Jack
       @file = file
       @grammar = YAML.safe_load(grammar_file, symbolize_names: true)
       @rules = build_rules(grammar)
-      @state = "keep_chars"
+      @state = 'keep_chars'
 
       @current_str = ''
       @token_stack = []
@@ -24,24 +24,22 @@ module Jack
       match = match_rules(current_str)
 
       if !last_match[:rule].nil? && match[:rule].nil?
-        token_stack << last_match if !last_match[:rule].include?("comment")
+        token_stack << last_match unless last_match[:rule].include?('comment')
         match = match_rules(current_char)
         self.current_str = current_char
       end
 
-      if ["inline_comment"].include?(match[:rule])
+      if ['inline_comment'].include?(match[:rule])
         self.current_str = '' if ["\n", "\r"].include?(current_char)
-      elsif match[:rule] == "block_comment"
+      elsif match[:rule] == 'block_comment'
         self.current_str = ''
-      elsif !["block_comment", "half_block_comment"].include?(match[:rule])
-        self.current_str = '' if [" ", "\n", "\r"].include?(current_char)
+      elsif !%w[block_comment half_block_comment].include?(match[:rule])
+        self.current_str = '' if [' ', "\n", "\r"].include?(current_char)
       end
 
       self.last_match = match
 
-      if finished? && !last_match[:rule].nil?
-        token_stack << last_match
-      end
+      token_stack << last_match if finished? && !last_match[:rule].nil?
     end
 
     def finished?
@@ -49,7 +47,14 @@ module Jack
     end
 
     def to_xml
-      'asd'
+      advance until finished?
+
+      tokens = token_stack.map do |token|
+        rule = camelize(token[:rule])
+        "<#{rule}> #{token[:value]} </#{rule}>"
+      end
+
+      ['<tokens>', *tokens, '</tokens>\n'].join("\n")
     end
 
     private
@@ -66,12 +71,10 @@ module Jack
       }, {
         name: 'block_comment',
         match: "^#{block_start}((.|\n)*)#{block_end}$"
-      },
-      {
+      }, {
         name: 'half_block_comment',
         match: "^#{block_start}((.|\n)*)$"
-      }
-    ]
+      }]
 
       grammar[:rules].concat(comment_rules)
     end
@@ -91,6 +94,11 @@ module Jack
         rule: (matched_rule || {})[:name],
         value: str
       }
+    end
+
+    def camelize(str)
+      words = str.split('_')
+      words[0] + words[1..-1].collect(&:capitalize).join
     end
   end
 end
