@@ -29,14 +29,14 @@ module Jack
         self.current_str = current_char
       end
 
-      if ['inline_comment'].include?(match[:rule])
+      if ['inline_comment', 'string_constant'].include?(match[:rule])
         self.current_str = '' if ["\n", "\r"].include?(current_char)
       elsif match[:rule] == 'block_comment'
         self.current_str = ''
       elsif !%w[block_comment half_block_comment].include?(match[:rule])
         self.current_str = '' if [' ', "\n", "\r"].include?(current_char)
       end
-
+## add property partial ? and allow spaces and jumps
       self.last_match = match
 
       token_stack << last_match if finished? && !last_match[:rule].nil?
