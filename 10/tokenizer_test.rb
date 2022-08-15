@@ -10,4 +10,4 @@ file = File.open(path)
 tokenizer = Jack::Tokenizer.new(file)
 pp tokenizer.traverse
 
-# ruby tokenizer_test.rb ./mytest.jack
+# ruby tokenizer_test.rb ./custom_tests/comments.jack
