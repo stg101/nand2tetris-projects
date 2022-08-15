@@ -25,7 +25,7 @@ module Jack
         change_name! 'processing'
       elsif state[:name] == 'processing'
         if is_symbol(state[:char]) && state[:char] != '/'
-          commit_token!('symbol', state[:char])
+          commit_token!('symbol', scape_symbol(state[:char]))
           init_state!
         elsif state[:char] == '/'
           change_name! 'slash'
@@ -35,7 +35,7 @@ module Jack
           change_name! 'number'
         elsif is_word(state[:char])
           change_name! 'word'
-        elsif ["\n", "\r", ' '].include?(state[:char])
+        elsif state[:char].match(/\s/)
           init_state!
         end
       elsif state[:name] == 'string'
@@ -174,6 +174,18 @@ module Jack
     def camelize(str)
       words = str.split('_')
       words[0] + words[1..-1].collect(&:capitalize).join
+    end
+
+    def scape_symbol(char)
+      if(char == "<")
+        '&lt;'
+      elsif (char == ">")
+        '&gt;'
+      elsif (char == "&")
+        '&amp;'
+      else
+        char
+      end
     end
   end
 end
