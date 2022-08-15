@@ -5,6 +5,7 @@ module Jack
     attr_accessor :file, :state
 
     SYMBOLS = ['{', '}', '(', ')', '[', ']', '.', ',', ';', '+', '-', '*', '&', '|', '<', '>', '=', '~', '/'].freeze
+    KEYWORDS = ['class','constructor','function','method','field','static','var','int','char','boolean','void','true','false','null','this','let','do','if','else','while','return'].freeze
 
     def initialize(file)
       @file = file
@@ -28,8 +29,24 @@ module Jack
           init_state!
         elsif state[:char] == '/'
           change_name! 'slash'
+        elsif is_word(state[:char])
+          change_name! 'word'
         elsif ["\n", "\r", ' '].include?(state[:char])
           init_state!
+        end
+      elsif state[:name] == 'word'
+        grab_char!
+
+        if !is_word(state[:buffer])
+          word = state[:buffer][0..-2]
+
+          if is_keyword(word)
+            commit_token!('keyword', word)
+          else
+            commit_token!('indentifier', word)
+          end
+          state[:buffer] = state[:char]
+          change_name! 'processing'
         end
       elsif state[:name] == 'slash'
         grab_char!
@@ -69,6 +86,14 @@ module Jack
       SYMBOLS.include?(char)
     end
 
+    def is_word(str)
+      !str.match(/\s/) && str.match("^[a-zA-Z_][a-zA-Z0-9_]*$")
+    end
+
+    def is_keyword(str)
+      is_word(str) && KEYWORDS.include?(str)
+    end
+
     def change_name!(name)
       state[:name] = name
     end
@@ -92,9 +117,7 @@ module Jack
     end
 
     def grab_char!
-      return init_state! if file.eof?
-
-      state[:char] = file.readchar
+      state[:char] = file.eof? ? ' ' : file.readchar
       state[:buffer] += state[:char]
     end
 
