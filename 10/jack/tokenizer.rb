@@ -66,7 +66,7 @@ module Jack
           if is_keyword(word)
             commit_token!('keyword', word)
           else
-            commit_token!('indentifier', word)
+            commit_token!('identifier', word)
           end
           state[:buffer] = state[:char]
           change_name! 'processing'
@@ -135,7 +135,7 @@ module Jack
     end
 
     def commit_token!(token, value)
-      state[:token_stack] << {token: token, value: value}
+      state[:token_stack] << {name: token, value: value}
       state[:buffer] = ''
     end
 
@@ -154,6 +154,26 @@ module Jack
 
     def finished?
       file.eof? && (state[:name] == 'none')
+    end
+
+    def token_stack
+      state[:token_stack]
+    end
+
+    def to_xml
+      traverse
+
+      tokens = token_stack.map do |token|
+        name = camelize(token[:name])
+        "<#{name}> #{token[:value]} </#{name}>"
+      end
+
+      ['<tokens>', *tokens, "</tokens>\n"].join("\n")
+    end
+
+    def camelize(str)
+      words = str.split('_')
+      words[0] + words[1..-1].collect(&:capitalize).join
     end
   end
 end
