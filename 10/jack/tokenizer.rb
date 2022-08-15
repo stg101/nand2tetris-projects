@@ -29,10 +29,23 @@ module Jack
           init_state!
         elsif state[:char] == '/'
           change_name! 'slash'
+        elsif is_number(state[:char])
+          change_name! 'number'
         elsif is_word(state[:char])
           change_name! 'word'
         elsif ["\n", "\r", ' '].include?(state[:char])
           init_state!
+        end
+      elsif state[:name] == 'number'
+        grab_char!
+
+        if !is_number(state[:buffer])
+          raise "invalid identifier" if !state[:char].match(/\s/)
+
+          number = state[:buffer][0..-2]
+          commit_token!('integer_constant', number)
+          state[:buffer] = state[:char]
+          change_name! 'processing'
         end
       elsif state[:name] == 'word'
         grab_char!
@@ -85,9 +98,13 @@ module Jack
     def is_symbol(char)
       SYMBOLS.include?(char)
     end
-
+    
     def is_word(str)
       !str.match(/\s/) && str.match("^[a-zA-Z_][a-zA-Z0-9_]*$")
+    end
+
+    def is_number(str)
+      !str.match(/\s/) && str.match("^[0-9]+$")
     end
 
     def is_keyword(str)
