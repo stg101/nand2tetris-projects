@@ -1,0 +1,61 @@
+scopes:
+  - name: none
+    transitions:
+      - current: {char: ['{','}','(',')','[',']','.',',',';','+','-','*','&','|','<','>','=','~']}
+        next: {save: symbol}
+      - current: {char: '/', not_next_char: ['/', '*']}
+        next: {save: symbol}
+      - current: {char: '/', next_char: '/'}
+        next: {scope: inline_comment}
+      - current: {char: '/', next_char: '*'}
+        next: {scope: block_comment}
+      
+      - current: {char: [letter, underscore]}
+        next: {scope: word}
+      - current: {char: number}
+        next: {scope: number}
+      - current: {char: '"'}
+        next: {scope: string}
+      - current: {char: [" ", "\r", "\n"]}
+        next: {save: none}
+  # - name: slash
+  #   transitions:
+  #     - current: {not_next_char: ['/', '*']}
+  #       next: {save: symbol}
+  #     - current: {next_char: '/'}
+  #       next: {scope: inline_comment}
+  #     - current: {next_char: '*'}
+  #       next: {scope: block_comment}
+  - name: inline_comment
+    transitions:
+      - current: {char: "\n"}
+        next: {save: none}
+  - name: block_comment
+    transitions:
+      - current: {buffer: {starts-with: "/*", ends-with: "*/"}}
+        next: {save: none}
+  - name: word
+    transitions:
+      - current: {not_next_char: [number, letter, underscore], not_buffer: [while, do, ...]}
+        next: {save: indentifier}
+      - current: {not_next_char: [number, letter, underscore], buffer: [while, do, ...]}
+        next: {save: keyword}
+  - name: number
+    transitions:
+      - current: {not_next_char: number}
+        next: {save: number}
+  - name: string
+    transitions:
+      - current: {char: '"'}
+        next: {save: string}
+
+
+
+#####
+
+elements:
+ token_stack
+ char
+ line
+ cursor
+ buffer

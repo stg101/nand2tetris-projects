@@ -7,9 +7,7 @@ path = ARGV.first
 # pp tokenizer.content
 
 file = File.open(path)
-grammar_file = File.open('./tokenizer_grammar.yml')
-tokenizer = Jack::Tokenizer.new(file, grammar_file)
+tokenizer = Jack::Tokenizer.new(file)
+pp tokenizer.traverse
 
-File.open(path + ".comp", 'w') do |f|
-  f.write(tokenizer.to_xml)
-end
+# ruby tokenizer_test.rb ./mytest.jack

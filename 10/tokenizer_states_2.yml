@@ -1,0 +1,50 @@
+tokenizer:
+  vars: |
+    symbols = ['{','}','(',')','[',']','.',',',';','+','-','*','&','|','<','>','=','~','/']
+  preamble: |
+    token_stack = []
+    char = ''
+    line = 0
+    cursor = 0
+    buffer = ""
+  root_state:
+    name: active
+    states:
+      - name: any_token
+        initial: none
+        states:
+          - name: none
+            transitions:
+              - target: symbol
+                guard: $symbols.include?($char) and $char != '/'
+              - target: slash
+                guard: $char == '/'
+          - name: slash
+            transitions:
+              - target: symbol
+                guard: "!['*', '/'].include? $next_char"
+              - target: inline_comment
+                guard: $next_char == '/'
+              - target: block_comment
+                guard: $next_char == '*'
+          - name: symbol
+            action: |
+              commit_token symbol
+              asdasd
+              cursor += 1
+
+
+
+
+# elements:
+#  token_stack
+#  char
+#  line
+#  cursor
+#  buffer
+
+
+              # - target: inline_comment
+              #   guard: $char == '/' and $next_char = '/'
+              # - target: block_comment
+              #   guard: $char == '/' and $next_char = '*'
