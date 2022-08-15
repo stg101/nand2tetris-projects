@@ -183,6 +183,8 @@ module Jack
         '&gt;'
       elsif (char == "&")
         '&amp;'
+      elsif (char == '"')
+        '&quot;'
       else
         char
       end
