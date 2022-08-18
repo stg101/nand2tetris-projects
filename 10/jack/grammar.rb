@@ -94,7 +94,7 @@ module Jack
           grab_char.call
 
           if char == "'"
-            token = { type: 'token', value: buffer }
+            token = { type: 'token', value: buffer[1..-2] || '' }
             tree_insert!(pattern_tree, index_path, token)
             current_index += 1
             buffer = ''

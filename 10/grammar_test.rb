@@ -1,5 +1,6 @@
 require_relative 'jack/grammar'
 require 'byebug'
+require 'yaml'
 
 path = ARGV.first
 
@@ -9,7 +10,7 @@ path = ARGV.first
 grammar_file = File.open('./parser_grammar.yml')
 grammar = Jack::Grammar.new(grammar_file)
 
-pp grammar.parse
+print grammar.parse.to_yaml
 
 # File.open(path + ".comp", 'w') do |f|
 #   f.write(tokenizer.to_xml)

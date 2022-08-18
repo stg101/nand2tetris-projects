@@ -1,0 +1,351 @@
+---
+- :patterns:
+  - :type: token
+    :value: class
+  - :type: nonterm
+    :value: className
+  - :type: token
+    :value: "{"
+  - :type: nonterm
+    :value: classVarDec
+    :modifier: "*"
+  - :type: nonterm
+    :value: subroutineDec
+    :modifier: "*"
+  - :type: token
+    :value: "}"
+  :name: :class
+- :patterns:
+  - :patterns:
+    - :type: token
+      :value: static
+    - :type: token
+      :value: field
+    :type: or
+  - :type: nonterm
+    :value: type
+  - :type: nonterm
+    :value: varName
+  - :patterns:
+    - :type: token
+      :value: ","
+    - :type: nonterm
+      :value: varName
+    :modifier: "*"
+  - :type: token
+    :value: ";"
+  :name: :classVarDec
+- :patterns:
+  - :type: token
+    :value: int
+  - :type: token
+    :value: char
+  - :type: token
+    :value: boolean
+  - :type: nonterm
+    :value: className
+  :type: or
+  :name: :type
+- :patterns:
+  - :patterns:
+    - :type: token
+      :value: constructor
+    - :type: token
+      :value: function
+    - :type: token
+      :value: method
+    :type: or
+  - :patterns:
+    - :type: token
+      :value: void
+    - :type: nonterm
+      :value: type
+    :type: or
+  - :type: nonterm
+    :value: subroutineName
+  - :type: token
+    :value: "("
+  - :type: nonterm
+    :value: parameterList
+  - :type: token
+    :value: ")"
+  - :type: nonterm
+    :value: subroutineBody
+  :name: :subroutineDec
+- :patterns:
+  - :patterns:
+    - :patterns:
+      - :type: nonterm
+        :value: type
+      - :type: nonterm
+        :value: varName
+    - :patterns:
+      - :type: token
+        :value: ","
+      - :type: nonterm
+        :value: type
+      - :type: nonterm
+        :value: varName
+      :modifier: "*"
+    :modifier: "?"
+  :name: :parameterList
+- :patterns:
+  - :type: token
+    :value: "{"
+  - :type: nonterm
+    :value: varDec
+    :modifier: "*"
+  - :type: nonterm
+    :value: statements
+  - :type: token
+    :value: "}"
+  :name: :subroutineBody
+- :patterns:
+  - :type: token
+    :value: var
+  - :type: nonterm
+    :value: type
+  - :type: nonterm
+    :value: varName
+  - :patterns:
+    - :type: token
+      :value: ","
+    - :type: nonterm
+      :value: varName
+    :modifier: "*"
+  - :type: token
+    :value: ";"
+  :name: :varDec
+- :patterns:
+  - :type: nonterm
+    :value: Identifier
+  :name: :className
+- :patterns:
+  - :type: nonterm
+    :value: Identifier
+  :name: :subroutineName
+- :patterns:
+  - :type: nonterm
+    :value: Identifier
+  :name: :varName
+- :patterns:
+  - :type: nonterm
+    :value: statement
+    :modifier: "*"
+  :name: :statements
+- :patterns:
+  - :type: nonterm
+    :value: letStatement
+  - :type: nonterm
+    :value: ifStatement
+  - :type: nonterm
+    :value: whileStatement
+  - :type: nonterm
+    :value: doStatement
+  - :type: nonterm
+    :value: returnStatement
+  :type: or
+  :name: :statement
+- :patterns:
+  - :type: token
+    :value: let
+  - :type: nonterm
+    :value: varName
+  - :patterns:
+    - :type: token
+      :value: "["
+    - :type: nonterm
+      :value: expression
+    - :type: token
+      :value: "]"
+    :modifier: "?"
+  - :type: token
+    :value: "="
+  - :type: nonterm
+    :value: expression
+  - :type: token
+    :value: ";"
+  :name: :letStatement
+- :patterns:
+  - :type: token
+    :value: if
+  - :type: token
+    :value: "("
+  - :type: nonterm
+    :value: expression
+  - :type: token
+    :value: ")"
+  - :type: token
+    :value: "{"
+  - :type: nonterm
+    :value: statements
+  - :type: token
+    :value: "}"
+  - :patterns:
+    - :type: token
+      :value: else
+    - :type: token
+      :value: "{"
+    - :type: nonterm
+      :value: statements
+    - :type: token
+      :value: "}"
+    :modifier: "?"
+  :name: :ifStatement
+- :patterns:
+  - :type: token
+    :value: while
+  - :type: token
+    :value: "("
+  - :type: nonterm
+    :value: expression
+  - :type: token
+    :value: ")"
+  - :type: token
+    :value: "{"
+  - :type: nonterm
+    :value: statements
+  - :type: token
+    :value: "}"
+  :name: :whileStatement
+- :patterns:
+  - :type: token
+    :value: do
+  - :type: nonterm
+    :value: subroutineCall
+  - :type: token
+    :value: ";"
+  :name: :doStatement
+- :patterns:
+  - :type: token
+    :value: return
+  - :type: nonterm
+    :value: expression
+    :modifier: "?"
+  - :type: token
+    :value: ";"
+  :name: :returnStatement
+- :patterns:
+  - :type: nonterm
+    :value: term
+  - :patterns:
+    - :type: nonterm
+      :value: op
+    - :type: nonterm
+      :value: term
+    :modifier: "*"
+  :name: :expression
+- :patterns:
+  - :type: nonterm
+    :value: integerConstant
+  - :type: nonterm
+    :value: stringConstant
+  - :type: nonterm
+    :value: keywordConstant
+  - :type: nonterm
+    :value: varName
+  - :patterns:
+    - :type: nonterm
+      :value: varName
+    - :type: token
+      :value: "["
+    - :type: nonterm
+      :value: expression
+    - :type: token
+      :value: "]"
+  - :type: nonterm
+    :value: subroutineCall
+  - :patterns:
+    - :type: token
+      :value: "("
+    - :type: nonterm
+      :value: expression
+    - :type: token
+      :value: ")"
+  - :patterns:
+    - :type: nonterm
+      :value: unaryOp
+    - :type: nonterm
+      :value: term
+  :type: or
+  :name: :term
+- :patterns:
+  - :patterns:
+    - :type: nonterm
+      :value: subroutineName
+    - :type: token
+      :value: "("
+    - :type: nonterm
+      :value: expressionList
+    - :type: token
+      :value: ")"
+  - :patterns:
+    - :patterns:
+      - :type: nonterm
+        :value: className
+      - :type: nonterm
+        :value: varName
+      :type: or
+    - :type: token
+      :value: "."
+    - :type: nonterm
+      :value: subroutineName
+    - :type: token
+      :value: "("
+    - :type: nonterm
+      :value: expressionList
+    - :type: token
+      :value: ")"
+  :type: or
+  :name: :subroutineCall
+- :patterns:
+  - :patterns:
+    - :type: nonterm
+      :value: expression
+    - :patterns:
+      - :type: token
+        :value: ","
+      - :type: nonterm
+        :value: expression
+      :modifier: "*"
+    :modifier: "?"
+  :name: :expressionList
+- :patterns:
+  - :type: token
+    :value: "+"
+  - :type: token
+    :value: "-"
+  - :type: token
+    :value: "*"
+  - :type: token
+    :value: "/"
+  - :type: token
+    :value: "&"
+  - :type: token
+    :value: "|"
+  - :type: token
+    :value: "<"
+  - :type: token
+    :value: ">"
+  - :type: token
+    :value: "="
+  :type: or
+  :name: :op
+- :patterns:
+  - :type: token
+    :value: "-"
+  - :type: token
+    :value: "~"
+  :type: or
+  :name: :unaryOp
+- :patterns:
+  - :type: token
+    :value: 'true'
+  - :type: token
+    :value: 'false'
+  - :type: token
+    :value: 'null'
+  - :type: token
+    :value: this
+  :type: or
+  :name: :keywordConstant
