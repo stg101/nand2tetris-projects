@@ -50,9 +50,9 @@ module Jack
             state = 'or'
           elsif ['*', '?'].include? char
             state = 'modifier'
-          elsif char == '('
+          elsif ['(', '['].include? char
             state = 'group_start'
-          elsif char == ')'
+          elsif [')', ']'].include? char
             state = 'group_end'
           elsif char.match('^[a-zA-Z0-9_]*$')
             state = 'non_term'
