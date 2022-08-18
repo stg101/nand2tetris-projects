@@ -1,0 +1,72 @@
+rules:
+  # class: 'class' className '{' classVarDec* subroutineDec* '}'
+  - name: class
+    patterns: [ 
+      'class','$className','{', $classVarDec*,'$subroutineDec','}',
+    ]
+  # classVarDec: ('static' | 'field' ) type varName (',' varName)* ';'
+  - name: classVarDec
+    patterns: [
+      {type: or, patterns: ['static', 'field']},
+      '$type','$varName',
+      {modifier: '*', patterns: [',', '$varName']},
+      ';'
+    ]
+  # type: 'int' | 'char' | 'boolean' | className
+  - name: type
+    patterns: {type: or, patterns: ['int', 'char', 'boolean', '$className']}
+  # subroutineDec: ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
+  - name: subroutineDec
+    patterns: [
+      {type: or, patterns: ['constructor', 'function', 'method']},
+      {type: or, patterns: ['void', 'type']},
+      '$subroutineName','(','$parameterList',')','$subroutineBody'
+    ]
+  # parameterList: ( (type varName) (',' type varName)*)?
+  - name: parameterList
+    patterns: {
+      modifier: '?',
+      patterns: [
+        {patterns: ['$type', '$varName']},
+        {modifier: '*'}
+      ]
+    }
+
+
+
+
+
+
+
+
+  - name: keyword_constant
+    type: keyword
+    patterns: ['true','false','null','this']
+  - name: unary_op
+    type: symbol
+    patterns: ['-','~']
+  - name: op
+    type: symbol
+    patterns: ['+','-','*','/','&','|','<','>','=']
+  - name: expression_list # "(expression (','expression)*)?"
+    patterns: [{
+      modifier: '?',
+      patterns: [
+        {type: nonterm, value: 'expression'},
+        {
+          modifier: '*',
+          patterns: [
+            {type: symbol, value: ','},
+            {type: nonterm, value: 'expression'}
+          ]
+        }
+      ]
+    }]
+  - name: subroutine_call
+    patterns: [
+
+    ]
+
+
+
+subroutineName '(' expressionList ')' | ( className | varName) '.' subroutineName '(' expressionList ')' 

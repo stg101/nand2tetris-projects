@@ -17,7 +17,7 @@ module Jack
       }
     end
 
-    def advance ## check transitions
+    def step
       return if finished?
 
       if state[:name] == 'none'
@@ -97,7 +97,19 @@ module Jack
           init_state!
         end
       end
+    end
 
+    def advance
+      stack_length = token_stack.length
+      step until token_stack.length > stack_length || finished?
+
+      token_stack[-1]
+    end
+
+    def token_type
+      return if token_stack.empty?
+
+      token_stack[-1][:name]
     end
 
     def traverse
@@ -154,6 +166,10 @@ module Jack
 
     def finished?
       file.eof? && (state[:name] == 'none')
+    end
+
+    def more_tokens?
+      !finished?
     end
 
     def token_stack
