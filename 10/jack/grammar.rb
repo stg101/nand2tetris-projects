@@ -21,7 +21,7 @@ module Jack
       char = ''
       index_path = []
       current_index = 0
-      pattern_tree = []
+      pattern_tree = {}
       buffer = ''
       state = 'none'
 
@@ -46,6 +46,7 @@ module Jack
         # char = grab_char
         # buffer += char
         # puts({ char: char, state: state, buffer: buffer})
+        # puts pattern_tree
 
         case state
         when 'none'
@@ -57,11 +58,25 @@ module Jack
           elsif char == ' '
             buffer = ''
             state = 'none'
+          elsif char == '|'
+            state = 'metadata'
+          elsif ['*', '?'].include? char
+            state = 'modifier'
           elsif char == '('
             state = 'group_start'
           elsif char == ')'
             state = 'group_end'
           end
+        when 'modifier'
+          meta = metadata(pattern_tree, [*index_path, current_index])
+          meta.merge!({modifier: char})
+          buffer = ''
+          state = 'none'
+        when 'metadata'
+          meta = metadata(pattern_tree, index_path)
+          meta.merge!({type: 'or'}) if char == '|'
+          buffer = ''
+          state = 'none'
         when 'token'
           grab_char.call
 
@@ -96,15 +111,27 @@ module Jack
     end
 
     def tree_insert!(tree, path, value)
-      context = tree
+      tree[:patterns] = [] if tree[:patterns].nil?
+      context = tree[:patterns]
 
-      # puts({act:"insert", path: path})
+      puts({act:"insert", path: path})
       path.each do |key|
-        context[key] = [] if context[key].nil?
-        context = context[key]
+        context[key] = {} if context[key].nil?
+        context[key][:patterns] = [] if context[key][:patterns].nil?
+        context = context[key][:patterns]
       end
 
       context << value
+    end
+
+    def metadata(tree, path)
+      context = tree
+
+      path.each do |key|
+        context = context[:patterns][key]
+      end
+
+      context
     end
   end
 
