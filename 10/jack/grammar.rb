@@ -1,20 +1,19 @@
+require 'yaml'
+
 module Jack
   class Grammar
+    attr_accessor :original, :rules
+
     def initialize(file)
+      @original = YAML.load_file(file, symbolize_names: true)
+      @rules = []
     end
 
-    # def tokenize(str)
-    #   tokens = str.split(' ')
-    #   tokens.map do |token|
-    #     if token[0] == "'" && token[-1] == "'"
-    #       {name: 'const', value: token[1..]}
-    #     elsif token == "("
-    #       {name: 'group_start', value: "("}
-    #     elsif token == ")"
-    #       {name: 'group_start', value: ")"}
-    #     end
-    #   end
-    # end
+    def parse
+      original[:grammar].map do |k,v|
+        parse_pattern(v).merge({name: k})
+      end
+    end
 
     def parse_pattern(str)
       chars = str.split('')
@@ -27,15 +26,6 @@ module Jack
 
       char_index = -1
 
-      # def grab_char
-      #   char_index +=1
-      #   chars[char_index]
-      # end
-
-      # def finished?
-      #   char_index == chars.length && state == 'none'
-      # end
-
       grab_char = -> do
         char_index += 1
         char = chars[char_index] || ' '
@@ -43,8 +33,6 @@ module Jack
       end
 
       while !(char_index == chars.length && state == 'none') do
-        # char = grab_char
-        # buffer += char
         # puts({ char: char, state: state, buffer: buffer})
         # puts pattern_tree
 
@@ -59,29 +47,53 @@ module Jack
             buffer = ''
             state = 'none'
           elsif char == '|'
-            state = 'metadata'
+            state = 'or'
           elsif ['*', '?'].include? char
             state = 'modifier'
           elsif char == '('
             state = 'group_start'
           elsif char == ')'
             state = 'group_end'
+          elsif char.match('^[a-zA-Z0-9_]*$')
+            state = 'non_term'
+          end
+        when 'non_term'
+          grab_char.call
+
+          if !char.match('^[a-zA-Z0-9_]*$')
+            nonterm = { type: 'nonterm', value: buffer[0..-2] }
+            tree_insert!(pattern_tree, index_path, nonterm)
+            current_index += 1
+            buffer = char
+            state = 'processing'
           end
         when 'modifier'
-          meta = metadata(pattern_tree, [*index_path, current_index])
+          meta = metadata(pattern_tree, [*index_path, current_index - 1])
           meta.merge!({modifier: char})
           buffer = ''
           state = 'none'
-        when 'metadata'
+        when 'or'
           meta = metadata(pattern_tree, index_path)
-          meta.merge!({type: 'or'}) if char == '|'
+          meta.merge!({type: 'or'})
+
+          # patterns = meta[:patterns].dup
+          # sub_group = patterns.filter {|p| p[:type] != 'implicit_group'}
+          # old_groups = patterns.filter {|p| p[:type] == 'implicit_group'}
+
+          # if !sub_group.empty?
+          #   meta[:patterns] = old_groups
+          #   meta[:patterns] << {
+          #     type: 'implicit_group',
+          #     patterns: sub_group
+          #   }
+          # end
+
           buffer = ''
           state = 'none'
         when 'token'
           grab_char.call
 
           if char == "'"
-            state = 'none'
             token = { type: 'token', value: buffer }
             tree_insert!(pattern_tree, index_path, token)
             current_index += 1
@@ -95,16 +107,10 @@ module Jack
           state = 'none'
         when 'group_end'
           current_index = index_path.pop
+          current_index += 1
           buffer = ''
           state = 'none'
         end
-
-        # case char
-        # when "'"
-        #   state = 'token'
-        # else
-
-        # end
       end
 
       pattern_tree
@@ -114,7 +120,7 @@ module Jack
       tree[:patterns] = [] if tree[:patterns].nil?
       context = tree[:patterns]
 
-      puts({act:"insert", path: path})
+      # puts({act:"insert", path: path})
       path.each do |key|
         context[key] = {} if context[key].nil?
         context[key][:patterns] = [] if context[key][:patterns].nil?
@@ -134,6 +140,8 @@ module Jack
       context
     end
   end
-
-  # path = [0, patterns, 0]
 end
+
+
+# create a new type implicit group
+# ors (|) create implicit groups

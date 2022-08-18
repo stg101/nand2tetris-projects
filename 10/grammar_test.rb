@@ -9,6 +9,8 @@ path = ARGV.first
 grammar_file = File.open('./parser_grammar.yml')
 grammar = Jack::Grammar.new(grammar_file)
 
+pp grammar.parse
+
 # File.open(path + ".comp", 'w') do |f|
 #   f.write(tokenizer.to_xml)
 # end
@@ -25,4 +27,15 @@ grammar = Jack::Grammar.new(grammar_file)
 # p grammar.parse_pattern("'too'")
 # p grammar.parse_pattern("'too' 'too' 'too'")
 # pp grammar.parse_pattern("'too' 'too' ('too''too')")
-pp grammar.parse_pattern("'too' ('too' | 'too')* 'too'")
+# pp grammar.parse_pattern("too ('too' | too)* 'too'")
+
+
+# pp grammar.parse_pattern("('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody")
+# pp grammar.parse_pattern("(expression (','expression)*)?")
+
+# pp grammar.parse_pattern("('static' | 'field' ) type varName (',' varName)* ';'")
+
+
+
+
+

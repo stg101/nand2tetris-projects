@@ -1,12 +1,5 @@
 grammar:
-  - name: subroutineCall
-    pattern: subroutineName '(' expressionList ')' | ( className | varName) '.' subroutineName '(' expressionList ')'
-  - name: expressionList
-    pattern: (expression (',' expression)* )?
-
-
-    # ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody 
-
-  
-  # 'constructor'
-  # [{type: token, value: constructor}]
+  # subroutineCall: subroutineName '(' expressionList ')' | ( className | varName) '.' subroutineName '(' expressionList ')'
+  # test: a b | (c|d) e
+  test: a b | c d
+  # expressionList: (expression (',' expression)* )?
