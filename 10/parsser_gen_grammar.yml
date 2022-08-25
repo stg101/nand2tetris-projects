@@ -1,4 +1,19 @@
 ---
+- :type: token
+  :match_value: "'class' | 'constructor' | 'function' | 'method' | 'field' | 'static'
+    |  'var' | 'int' | 'char' | 'boolean' | 'void' | 'true' | 'false' | 'null' | 'this'
+    |  'let' | 'do' | 'if' | 'else' | 'while' | 'return'"
+  :name: :keyword
+- :type: token
+  :match_value: "'{' | '}' | '(' | ')' | '[' | ']' | '. ' | ', ' | '; ' | '+' | '-'
+    | '*' | '/' | '&' | '|' | '<' | '>' | '=' | '~'"
+  :name: :symbol
+- :name: :integerConstant
+  :type: token
+- :name: :stringConstant
+  :type: token
+- :name: :identifier
+  :type: token
 - :patterns:
   - :type: token
     :value: class

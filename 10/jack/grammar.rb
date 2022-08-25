@@ -11,7 +11,12 @@ module Jack
 
     def parse
       original[:grammar].map do |k,v|
-        parse_pattern(v).merge({name: k})
+        name = k.to_s
+
+        next {name: name, type: v} if v == 'token'
+        next v.merge({name: name}) if (v.class == Hash && v[:type] == 'token')
+
+        parse_pattern(v).merge({name: name})
       end
     end
 

@@ -1,106 +1,95 @@
 require_relative 'tokenizer'
+require_relative 'grammar'
 
 module Jack
   class Parser
-    attr_accessor :tokenizer
+    attr_accessor :tokenizer, :grammar, :state
 
-    def initialize(file)
+    def initialize(file, grammar_file)
       @tokenizer = Tokenizer.new(file)
+      @grammar = Grammar.new(grammar_file).parse
+
+      @state = {
+        buffer: [],
+        buffer_index: 0,
+        token: nil
+      }
     end
 
     def parse
-      parse_class
+      parse_pattern("subroutineName")
     end
 
-    private
+    # private
 
+    def parse_pattern(name)
+      pattern = find_pattern(name)
+      type = pattern[:type] || 'group'
 
-    def eat(token_name, token_value = nil)
-      token = tokenizer.advance
-      return false if token[:name] != token_name
-      return false if !token_value.nil? && token[:value] != token_value
-
-      name = camelize(token[:name])
-      "<#{name}> #{token[:value]} </#{name}>"
-    end
-
-    def parse_pattern(pattern)
-      op = instr[0]
-  
-      send("#{op}_template")
-    end
-
-    def parse_class
-      wrap('class') do
-        [eat('keyword', 'class'),
-         eat('identifier'),
-         eat('symbol', '{'),
-         parse_class_var_dec]
+      case type
+      when 'token'
+        parse_token(pattern)
+      when 'group'
+        # parse_group(pattern)    
       end
     end
 
-    def parse_class_var_dec
-      wrap('classVarDec') do
-        [
-          eat('keyword', 'static') || eat('keyword', 'field'),
-          eat('keyword', 'type'),
-          eat('indentifier')
-        ]
-      end
-    end
-
-    def pattern_or(patterns)
-
-    end
-
-    def wrap(tag)
-      "<#{tag}>\n#{yield.join("\n")}\n<#{tag}>"
-    end
-
-    def camelize(str)
-      words = str.split('_')
-      words[0] + words[1..].collect(&:capitalize).join
-    end
-
-    def parse_expr_list(expr_list)
+    def parse_token(pattern)
+      reset_buffer_index!
       grab_token!
 
-      expr_list.any do |expr|
+      if pattern[:name].nil? && !pattern[:value].nil?
+        pattern[:name] = find_token_def(pattern[:value])[:name]
+        match_name = pattern[:name] == current_token[:name]
+        match_value = pattern[:value] == current_token[:value]
 
+        return false unless match_name && match_value
+      elsif !pattern[:name].nil? && pattern[:value].nil?
+        match_name = pattern[:name] == current_token[:name]
+
+        return false unless match_name
+      end
+
+      build_token_element(current_token)
+    end
+
+    def build_token_element(token)
+      tag = token[:name]
+      "<#{tag}> #{token[:value]} </#{tag}>"
+    end
+
+    def current_token
+      state[:token]
+    end
+
+    def find_token_def(value)
+      grammar.find do |p|
+        p[:type] == 'token' && p[:match_value].include?(value)
       end
     end
 
-    # def validate_expr(expr)
-    #   subexpr_list = parse_subexpr(expr)
+    def reset_buffer_index!
+      state[:buffer_index] = 0
+    end
 
-    #   subexpr_list.any do |subexpr|
-    #     validate_expr(subexpr)
-    #   end
-    # end
-
-    # def validate_expr(expr)
-    #   expr.any do |expr_item|
-    #     grab_token!
-    #     validate_expr(expr_item)
-    #   end
-    # end
-
-    def validate_expr(expr)
-      grab_token!
-      
-      if terminal
-        expr == last_token
+    def grab_token!
+      if state[:buffer].length == state[:buffer_index]
+        state[:token] = tokenizer.advance
+        state[:buffer] << state[:token]
       else
-        expr.any do |expr_item|
-          validate_expr(expr_item)
-        end
+        index = state[:buffer_index]
+        state[:token] = state[:buffer][index]
+      end
+
+      state[:buffer_index] += 1
+    end
+
+    def find_pattern(name)
+      grammar.find do |p|
+        p[:name] == name
       end
     end
 
-    def grab_token
-      state[:token] = file.advance
-      state[:buffer] << state[:token]
-    end
   end
 end
 
