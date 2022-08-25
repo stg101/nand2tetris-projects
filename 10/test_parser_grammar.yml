@@ -9,5 +9,5 @@ grammar:
   stringConstant: token
   identifier: token
   ###
+  className: identifier
   sequence: "'class' className"
-  className: Identifier

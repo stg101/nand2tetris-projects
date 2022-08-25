@@ -9,29 +9,54 @@ module Jack
       @tokenizer = Tokenizer.new(file)
       @grammar = Grammar.new(grammar_file).parse
 
+      # pp grammar
+
       @state = {
         buffer: [],
         buffer_index: 0,
-        token: nil
+        token: nil,
+        error: ''
       }
     end
 
     def parse
-      parse_pattern("subroutineName")
+      # parse_label("subroutineName")
     end
 
     # private
-
-    def parse_pattern(name)
-      pattern = find_pattern(name)
+    def parse_pattern(pattern)
       type = pattern[:type] || 'group'
+
+      # puts pattern
 
       case type
       when 'token'
         parse_token(pattern)
+      when 'nonterm'
+        parse_label(pattern[:value])
       when 'group'
-        # parse_group(pattern)    
+        parse_group(pattern)
       end
+    end
+
+    def parse_label(name)
+      pattern = find_pattern(name)
+      parse_pattern(pattern)
+    end
+
+    def parse_group(pattern)
+      result = []
+
+      pattern[:patterns].each do |p|
+        reset_buffer_index!
+        result_item = parse_pattern(p)
+        raise "failed pattern : #{pattern}" unless result_item
+
+        result << result_item
+        clear_buffer!
+      end
+
+      result.join("\n")
     end
 
     def parse_token(pattern)
@@ -50,12 +75,21 @@ module Jack
         return false unless match_name
       end
 
+      clear_buffer!
       build_token_element(current_token)
     end
 
     def build_token_element(token)
       tag = token[:name]
       "<#{tag}> #{token[:value]} </#{tag}>"
+    end
+
+    def set_error!(error)
+      state[:error] = error
+    end
+
+    def clear_buffer!
+      state[:buffer] = []
     end
 
     def current_token
