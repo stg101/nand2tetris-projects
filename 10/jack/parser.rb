@@ -13,10 +13,53 @@ module Jack
 
       @state = {
         buffer: [],
-        buffer_index: 0,
+        buffer_index: -1,
         token: nil,
         error: ''
       }
+    end
+
+    #     (a | b) (c | d)
+    #     (a b) | (c d)
+
+    # inside an or group we go back
+    # to initial state every step
+
+    # inside normal group we dont
+    # go back,
+    # set_
+    # hide buffer abstraction
+    # inside index abstraction
+
+    def increment_index
+      new_index = state[:buffer_index] + 1
+      new_token = state[:buffer][new_index]
+      if new_token.nil?
+        new_token = tokenizer.advance
+        state[:buffer] << new_token
+      end
+
+      state[:token] = new_token
+      state[:buffer_index] = new_index
+    end
+
+    def decrement_index
+      new_index = state[:buffer_index] - 1
+      # return if new_index.negative?
+
+      new_token = state[:buffer][new_index]
+      state[:token] = new_token
+      state[:buffer_index] = new_index
+    end
+
+    def goto_index(new_index)
+      while new_index != state[:buffer_index]
+        if new_index < state[:buffer_index]
+          decrement_index
+        else
+          increment_index
+        end
+      end
     end
 
     def parse
@@ -27,7 +70,7 @@ module Jack
     def parse_pattern(pattern)
       type = pattern[:type] || 'group'
 
-      # puts pattern
+      # p pattern
 
       case type
       when 'token'
@@ -36,6 +79,8 @@ module Jack
         parse_label(pattern[:value])
       when 'group'
         parse_group(pattern)
+      when 'or'
+        parse_or(pattern)
       end
     end
 
@@ -44,24 +89,41 @@ module Jack
       parse_pattern(pattern)
     end
 
+    def parse_or(pattern)
+      initial_index = state[:buffer_index]
+      result = nil
+
+      pattern[:patterns].find do |p|
+        goto_index(initial_index)
+        result = parse_pattern(p)
+        break if result
+      end
+
+      raise pattern_error(pattern) if result.nil?
+
+      result
+    end
+
     def parse_group(pattern)
       result = []
 
       pattern[:patterns].each do |p|
-        reset_buffer_index!
         result_item = parse_pattern(p)
-        raise "failed pattern : #{pattern}" unless result_item
-
         result << result_item
-        clear_buffer!
       end
 
-      result.join("\n")
+      return result[0] if result.length == 1
+      return false if result.any?(&:!)
+
+      result
+    end
+
+    def pattern_error(pattern)
+      "failed pattern : #{pattern}"
     end
 
     def parse_token(pattern)
-      reset_buffer_index!
-      grab_token!
+      increment_index
 
       if pattern[:name].nil? && !pattern[:value].nil?
         pattern[:name] = find_token_def(pattern[:value])[:name]
@@ -75,8 +137,7 @@ module Jack
         return false unless match_name
       end
 
-      clear_buffer!
-      build_token_element(current_token)
+      current_token
     end
 
     def build_token_element(token)
@@ -88,9 +149,12 @@ module Jack
       state[:error] = error
     end
 
-    def clear_buffer!
-      state[:buffer] = []
-    end
+    # def clear_buffer!
+    #   # TODO: clear from current index
+    #   # TODO: or_seq ???
+
+    #   state[:buffer] = state[:buffer][]
+    # end
 
     def current_token
       state[:token]
@@ -102,28 +166,15 @@ module Jack
       end
     end
 
-    def reset_buffer_index!
-      state[:buffer_index] = 0
-    end
-
-    def grab_token!
-      if state[:buffer].length == state[:buffer_index]
-        state[:token] = tokenizer.advance
-        state[:buffer] << state[:token]
-      else
-        index = state[:buffer_index]
-        state[:token] = state[:buffer][index]
-      end
-
-      state[:buffer_index] += 1
-    end
+    # def reset_buffer_index!
+    #   state[:buffer_index] = 0
+    # end
 
     def find_pattern(name)
       grammar.find do |p|
         p[:name] == name
       end
     end
-
   end
 end
 
@@ -134,10 +185,10 @@ end
 # token | token
 # noterm '(' noterm ')' | noterm
 # whats the problem here
-# we start grabbing tokens but fails in the last, 
-# we need to reuse them for the next ones 
+# we start grabbing tokens but fails in the last,
+# we need to reuse them for the next ones
 # noterm*
-# we start grabbing tokens for the first 
+# we start grabbing tokens for the first
 # appear if not checking the tokens can be reused
 
 # every expression has side effects
@@ -149,10 +200,7 @@ end
 # grab one token
 # check # we can do dfs or bfs
 # each parse should return true or false ?
-# 
-
-
-
+#
 
 # {:name=>"keyword", :value=>"class"}
 # {:name=>"identifier", :value=>"Main"}
