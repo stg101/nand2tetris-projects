@@ -75,18 +75,42 @@ module Jack
       case modifier
       when '*'
         result = []
-        while (r_item = resolve_parser(pattern))
-          result << r_item
+        r_item = true
+        saved_index = state[:buffer_index]
+        loop do # TODO: check what happens with the index
+          saved_index = state[:buffer_index]
+          r_item = resolve_parser(pattern)
+
+          if r_item
+            result << r_item
+          else
+            goto_index(saved_index)
+            break
+          end
         end
-        result
+
+        result.empty? ? 'ignore' : result
       when '?'
-        resolve_parser(pattern) || 'ignore'
+        saved_index = state[:buffer_index]
+        result = resolve_parser(pattern)
+
+        if result
+          result
+        else
+          goto_index(saved_index)
+          'ignore'
+        end
+
+        # resolve_parser(pattern) || 'ignore'
       else
         resolve_parser(pattern)
       end
     end
 
     def resolve_parser(pattern)
+      # p '<<<<<<<<<<<' * 5
+      # p pattern
+
       type = pattern[:type] || 'group'
 
       result =
@@ -101,7 +125,15 @@ module Jack
           parse_or(pattern)
         end
 
-      clear_result(result)
+      # clear_result(result)
+      rr = clear_result(result)
+
+      # p rr
+
+      # p 'tkn: '
+      # p current_token
+      # p '>>>>>>>>>>>' * 5
+      rr
     end
 
     def clear_result(result)
@@ -113,6 +145,7 @@ module Jack
     end
 
     def parse_label(name)
+      # puts "[ #{name} ]"
       pattern = find_pattern(name)
       parse_pattern(pattern)
     end
@@ -137,7 +170,12 @@ module Jack
 
       pattern[:patterns].each do |p|
         result_item = parse_pattern(p)
-        result << result_item
+        if result_item
+          result << result_item
+        else
+          result = [false]
+          break
+        end
       end
 
       return result[0] if result.length == 1
@@ -156,8 +194,8 @@ module Jack
       increment_index
 
       if pattern[:name].nil? && !pattern[:value].nil?
-        pattern[:name] = find_token_def(pattern[:value])[:name]
-        match_name = pattern[:name] == current_token[:name]
+        name = find_token_def(pattern[:value])[:name]
+        match_name = name == current_token[:name]
         match_value = pattern[:value] == current_token[:value]
 
         return false unless match_name && match_value
@@ -195,10 +233,6 @@ module Jack
         p[:type] == 'token' && p[:match_value].include?(value)
       end
     end
-
-    # def reset_buffer_index!
-    #   state[:buffer_index] = 0
-    # end
 
     def find_pattern(name)
       grammar.find do |p|

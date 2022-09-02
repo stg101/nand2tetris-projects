@@ -16,3 +16,4 @@ grammar:
   mixed2: "('class' className) | (className 'class')"
   repeater: "('class' className)*"
   opt: "('class'? className)"
+  error: "('class' className)* ';'"

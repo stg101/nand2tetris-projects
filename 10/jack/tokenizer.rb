@@ -103,7 +103,7 @@ module Jack
       stack_length = token_stack.length
       step until token_stack.length > stack_length || finished?
 
-      token_stack[-1]
+      camelize_token(token_stack[-1])
     end
 
     def token_type
@@ -157,6 +157,7 @@ module Jack
 
     def grab_char!
       state[:char] = file.eof? ? ' ' : file.readchar
+      # print state[:char]
       state[:buffer] += state[:char]
     end
 
@@ -190,6 +191,13 @@ module Jack
     def camelize(str)
       words = str.split('_')
       words[0] + words[1..-1].collect(&:capitalize).join
+    end
+
+    def camelize_token(tk)
+      {
+        name: camelize(tk[:name]),
+        value: tk[:value]
+      }
     end
 
     def scape_symbol(char)
