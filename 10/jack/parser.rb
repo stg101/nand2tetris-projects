@@ -68,9 +68,25 @@ module Jack
 
     # private
     def parse_pattern(pattern)
-      type = pattern[:type] || 'group'
+      modifier = pattern[:modifier]
+      # resolve_parser(pattern)
 
-      # p pattern
+      case modifier
+      when '*'
+        result = []
+        while (r_item = resolve_parser(pattern))
+          result << r_item
+        end
+        result
+      when '?'
+        return false
+      else
+        resolve_parser(pattern)
+      end
+    end
+
+    def resolve_parser(pattern)
+      type = pattern[:type] || 'group'
 
       case type
       when 'token'
@@ -122,7 +138,9 @@ module Jack
       "failed pattern : #{pattern}"
     end
 
-    def parse_token(pattern)
+    def parse_token(pattern) # dup ?
+      return false if !tokenizer.more_tokens?
+
       increment_index
 
       if pattern[:name].nil? && !pattern[:value].nil?

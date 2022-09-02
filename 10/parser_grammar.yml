@@ -16,9 +16,9 @@ grammar:
   parameterList: "( (type varName) (',' type varName)*)?"
   subroutineBody: "'{' varDec* statements '}'"
   varDec: "'var' type varName (',' varName)* ';'"
-  className: Identifier
-  subroutineName: Identifier
-  varName: Identifier
+  className: identifier
+  subroutineName: identifier
+  varName: identifier
   ###
   statements: statement*
   statement: "letStatement | ifStatement | whileStatement | doStatement | returnStatement"

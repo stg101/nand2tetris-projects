@@ -14,3 +14,4 @@ grammar:
   or_sequence: "'class' | className"
   mixed1: "('class' | className) ('class' | className)"
   mixed2: "('class' className) | (className 'class')"
+  repeater: "('class' className)*"
