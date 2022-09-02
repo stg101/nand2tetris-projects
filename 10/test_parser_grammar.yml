@@ -15,3 +15,4 @@ grammar:
   mixed1: "('class' | className) ('class' | className)"
   mixed2: "('class' className) | (className 'class')"
   repeater: "('class' className)*"
+  opt: "('class'? className)"

@@ -68,6 +68,7 @@ module Jack
 
     # private
     def parse_pattern(pattern)
+      # p pattern
       modifier = pattern[:modifier]
       # resolve_parser(pattern)
 
@@ -79,7 +80,7 @@ module Jack
         end
         result
       when '?'
-        return false
+        resolve_parser(pattern) || 'ignore'
       else
         resolve_parser(pattern)
       end
@@ -88,15 +89,26 @@ module Jack
     def resolve_parser(pattern)
       type = pattern[:type] || 'group'
 
-      case type
-      when 'token'
-        parse_token(pattern)
-      when 'nonterm'
-        parse_label(pattern[:value])
-      when 'group'
-        parse_group(pattern)
-      when 'or'
-        parse_or(pattern)
+      result =
+        case type
+        when 'token'
+          parse_token(pattern)
+        when 'nonterm'
+          parse_label(pattern[:value])
+        when 'group'
+          parse_group(pattern)
+        when 'or'
+          parse_or(pattern)
+        end
+
+      clear_result(result)
+    end
+
+    def clear_result(result)
+      if result.is_a? Array
+        result.reject { |r_item| r_item == 'ignore' }
+      else
+        result
       end
     end
 
@@ -129,7 +141,7 @@ module Jack
       end
 
       return result[0] if result.length == 1
-      return false if result.any?(&:!)
+      return false if result.any?(&:!) # simplify ?
 
       result
     end
@@ -139,7 +151,7 @@ module Jack
     end
 
     def parse_token(pattern) # dup ?
-      return false if !tokenizer.more_tokens?
+      return false unless tokenizer.more_tokens?
 
       increment_index
 
