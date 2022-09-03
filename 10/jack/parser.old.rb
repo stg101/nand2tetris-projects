@@ -3,15 +3,11 @@ require_relative 'grammar'
 
 module Jack
   class Parser
-    attr_accessor :tokenizer, :grammar, :state, :global_result, :label_pointers, :instructions
+    attr_accessor :tokenizer, :grammar, :state
 
     def initialize(file, grammar_file)
       @tokenizer = Tokenizer.new(file)
       @grammar = Grammar.new(grammar_file).parse
-      @global_result = {}
-      @label_pointers = []
-      @instructions = []
-      @random_seed = 0
 
       # pp grammar
 
@@ -43,7 +39,6 @@ module Jack
         state[:buffer] << new_token
       end
 
-      @instructions << {address: @label_pointers.dup, value: new_token}
       state[:token] = new_token
       state[:buffer_index] = new_index
     end
@@ -53,8 +48,6 @@ module Jack
       # return if new_index.negative?
 
       new_token = state[:buffer][new_index]
-
-      @instructions.pop
       state[:token] = new_token
       state[:buffer_index] = new_index
     end
@@ -71,10 +64,6 @@ module Jack
 
     def parse
       # parse_label("subroutineName")
-      # build_global_result(parse_label('class'))
-
-      parse_label('class')
-      build_global_result(@instructions)
     end
 
     # private
@@ -129,10 +118,7 @@ module Jack
         when 'token'
           parse_token(pattern)
         when 'nonterm'
-          abc = parse_label(pattern[:value])
-          label_pointers.pop
-
-          abc
+          parse_label(pattern[:value])
         when 'group'
           parse_group(pattern)
         when 'or'
@@ -159,16 +145,9 @@ module Jack
     end
 
     def parse_label(name)
-      # p label_pointers
       # puts "[ #{name} ]"
-      @random_seed += 1
-      label_pointers << "#{name}_L#{@random_seed}"
       pattern = find_pattern(name)
-      result = parse_pattern(pattern)
-
-
-      # global_result << {name: name, type: 'label', value: result}
-      result
+      parse_pattern(pattern)
     end
 
     def parse_or(pattern)
@@ -226,7 +205,6 @@ module Jack
         return false unless match_name
       end
 
-      # inject_global_result(label_pointers, current_token)
       current_token
     end
 
@@ -237,47 +215,6 @@ module Jack
 
     def set_error!(error)
       state[:error] = error
-    end
-
-    def inject_global_result(address, value)
-      # sym_addrs = address.map(&:to_sym)
-      # global_result.dig(sym_addrs)
-      current_scope = {}
-
-      address[0..-2].each do |add_item|
-        current_scope = global_result[add_item.to_sym]
-        if current_scope.nil?
-          global_result[add_item.to_sym] = {}
-          current_scope = global_result[add_item.to_sym]
-        end
-      end
-
-      current_scope[address[-1]] = value
-    end
-
-    def build_global_result(records)
-      global_values = []
-
-      records.each do |record|
-        value = record[:value]
-        address = record[:address]
-        current_values = global_values
-
-        address.each do |addr_item|
-          target = current_values.find {|val_i| val_i[:code] == addr_item}
-          if target.nil?
-            name = addr_item.split("_")[0]
-            target = {name: name, code: addr_item, values: []}
-            current_values << target
-          end
-
-          current_values = target[:values]
-        end
-
-        current_values << value
-      end
-
-      global_values
     end
 
     # def clear_buffer!
@@ -301,10 +238,6 @@ module Jack
       grammar.find do |p|
         p[:name] == name
       end
-    end
-
-    def hash_code # TODO: improve randomicity
-      (0...8).map { (65 + rand(26)).chr }.join
     end
   end
 end
