@@ -6,4 +6,6 @@
 
 // let game = SquareGame.new();
 
-let s = "string constant";
+// let s = "string constant";
+// (((y + size) < 254) & ((x + size) < 510))
+((y + size) < 254)

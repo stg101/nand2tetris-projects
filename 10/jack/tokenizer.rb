@@ -25,7 +25,7 @@ module Jack
         change_name! 'processing'
       elsif state[:name] == 'processing'
         if is_symbol(state[:char]) && state[:char] != '/'
-          commit_token!('symbol', scape_symbol(state[:char]))
+          commit_token!('symbol', state[:char]) # TODO: dont forget to scape
           init_state!
         elsif state[:char] == '/'
           change_name! 'slash'
