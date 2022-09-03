@@ -43,7 +43,7 @@ module Jack
         state[:buffer] << new_token
       end
 
-      @instructions << {address: @label_pointers.dup, value: new_token}
+      @instructions << { address: @label_pointers.dup, value: new_token }
       state[:token] = new_token
       state[:buffer_index] = new_index
     end
@@ -76,6 +76,45 @@ module Jack
       parse_label('class')
       build_global_result(@instructions)
     end
+
+    def to_xml(values_list = 'initial', indent_places = 0)
+      # pp values_list
+      # skip_names = %w[class classVarDec subroutineDec parameterList subroutineBody varDec
+      #                 statements letStatement ifStatement whileStatement doStatement
+      #                 returnStatement expression term expressionList].freeze
+      skip_names = %w[type className subroutineName varName statement subroutineCall identifier].freeze
+      values_list = parse if values_list == 'initial'
+      # return build_token_element(values_list[0]) if (values_list.length==1 && values_list[0][:values].nil?)
+
+      result = ''
+      values_list.each do |value_item|
+        indentation = (' ' * 2) * indent_places
+        if value_item[:values].nil?
+          (result += "#{indentation}#{build_token_element(value_item)}\n")
+          next
+        end
+
+        if skip_names.include?(value_item[:name])
+          result +=  "#{to_xml(value_item[:values], indent_places)}\n"
+          next
+        end
+
+        body = to_xml(value_item[:values], indent_places + 1)
+        result += "#{indentation}<#{value_item[:name]}>\n"
+        result += "#{body}\n"
+        # result += to_xml(value_item[:values])
+        result += "#{indentation}</#{value_item[:name]}>\n"
+        # result = ident(result, 2)
+      end
+
+      result.delete_suffix("\n")
+    end
+
+    # def ident(str, places)
+    #   str.split("\n").map do |chunk|
+    #     " "*places + chunk
+    #   end.join("\n")
+    # end
 
     # private
     def parse_pattern(pattern)
@@ -140,14 +179,13 @@ module Jack
         end
 
       # clear_result(result)
-      rr = clear_result(result)
+      clear_result(result)
 
       # p rr
 
       # p 'tkn: '
       # p current_token
       # p '>>>>>>>>>>>' * 5
-      rr
     end
 
     def clear_result(result)
@@ -164,11 +202,9 @@ module Jack
       @random_seed += 1
       label_pointers << "#{name}_L#{@random_seed}"
       pattern = find_pattern(name)
-      result = parse_pattern(pattern)
-
+      parse_pattern(pattern)
 
       # global_result << {name: name, type: 'label', value: result}
-      result
     end
 
     def parse_or(pattern)
@@ -264,10 +300,10 @@ module Jack
         current_values = global_values
 
         address.each do |addr_item|
-          target = current_values.find {|val_i| val_i[:code] == addr_item}
+          target = current_values.find { |val_i| val_i[:code] == addr_item }
           if target.nil?
-            name = addr_item.split("_")[0]
-            target = {name: name, code: addr_item, values: []}
+            name = addr_item.split('_')[0]
+            target = { name: name, code: addr_item, values: [] }
             current_values << target
           end
 
@@ -304,7 +340,7 @@ module Jack
     end
 
     def hash_code # TODO: improve randomicity
-      (0...8).map { (65 + rand(26)).chr }.join
+      (0...8).map { rand(65..90).chr }.join
     end
   end
 end
