@@ -84,7 +84,7 @@ module Jack
       #                 returnStatement expression term expressionList].freeze
       skip_names = %w[type className subroutineName varName statement 
                       subroutineCall identifier keywordConstant integerConstant 
-                      stringConstant op ].freeze
+                      stringConstant op unaryOp].freeze
       values_list = parse if values_list == 'initial'
       # return build_token_element(values_list[0]) if (values_list.length==1 && values_list[0][:values].nil?)
 
