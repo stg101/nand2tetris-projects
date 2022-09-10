@@ -21,7 +21,8 @@ parser = Jack::Parser.new(file, grammar_file)
 # pp parser.parse_label('repeater')
 # pp parser.parse_label('opt')
 # pp parser.parse_label('error')
-print parser.to_xml
+# print parser.to_xml
+pp parser.parse
 # pp parser.parse
 # pp parser.parse_label('letStatement')
 # pp parser.parse_label('letStatement')
