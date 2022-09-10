@@ -1,0 +1,14 @@
+class Main {
+    field int a;
+    field int b;
+    field int c;
+
+    method void expr() {
+        var int x;
+        let a = 1;
+        let b = 2;
+        let c = a + (b * (b - a)) + a;
+
+        return;
+    }
+}

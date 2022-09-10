@@ -36,3 +36,14 @@ grammar:
   op: "'+' | '-' | '*' | '/' | '&' | '|' | '<' | '>' | '='"
   unaryOp: "'-' | '~'"
   keywordConstant: "'true' | 'false' | 'null' | 'this'"
+
+# use this after getting the AST
+# transformations
+#   subroutineName: "
+#     this.values.0.name
+#   "
+#   subroutineCall: "
+#     push asd,
+#     asdasd ,
+#     call $subroutineName
+#   "

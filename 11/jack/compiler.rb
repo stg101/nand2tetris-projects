@@ -1,14 +1,24 @@
 require_relative 'parser'
+require_relative 'symbol_table'
 
 module Jack
   class Compiler
-    attr_accessor :file, :internal_paths, :grammar_file
+    attr_accessor :file, :internal_paths, :grammar_file,
+                  :state, :class_table, :subroutine_table
 
     def initialize(target_path)
       @internal_paths = parse_internal_paths(target_path)
       @grammar_file = File.open("#{__dir__}/parser_grammar.yml")
+      @class_table =  SymbolTable.new
+      @subroutine_table = SymbolTable.new
+      # @instructions = []
       # @file = File.open(path)
       # @analizer = Analizer.new(file)
+
+      @state = {
+        classname: '',
+        instructions: []
+      }
     end
 
     def compile
@@ -29,42 +39,66 @@ module Jack
     end
 
     def compile_file(file)
+      state[:instructions] = []
       parser = Parser.new(file, grammar_file)
-
-      to_xml(parser.parse)
+      # parser.parse
+      c_class(parser.parse[0])
+      state[:instructions]
     end
 
-    def to_xml(values_list = 'initial', indent_places = 0)
-      skip_names = %w[type className subroutineName varName statement
-                      subroutineCall identifier keywordConstant integerConstant
-                      stringConstant op unaryOp].freeze
-      values_list = parse if values_list == 'initial'
-
-      result = ''
-      values_list.each do |value_item|
-        indentation = (' ' * 2) * indent_places
-        if value_item[:values].nil?
-          (result += "#{indentation}#{build_token_element(value_item)}\n")
-          next
-        end
-
-        if skip_names.include?(value_item[:name])
-          result += "#{to_xml(value_item[:values], indent_places)}\n"
-          next
-        end
-
-        body = to_xml(value_item[:values], indent_places + 1)
-        result += "#{indentation}<#{value_item[:name]}>\n"
-        result += "#{body}\n"
-        result += "#{indentation}</#{value_item[:name]}>\n"
+    def c_class(ast)
+      class_name_ast = child_by_name(ast, 'className')
+      state[:classname] = class_name_ast[:values][0][:values][0][:value]
+      varDecs = children_by_name(ast, 'classVarDec')
+      varDecs.each do |dec|
+        c_class_var_dec(dec)
       end
 
-      result.delete_suffix("\n")
+      subroutineDecs = children_by_name(ast, 'subroutineDec')
+      subroutineDecs.each do |dec|
+        c_subroutine_dec(dec)
+      end
     end
 
-    def build_token_element(token)
-      tag = token[:name]
-      "<#{tag}> #{token[:value]} </#{tag}>"
+    def c_subroutine_dec(ast)
+      subroutine_table.refresh
+      name = ast[:values][0][:value]
+      classname = state[:classname]
+
+      body_ast = child_by_name(ast, 'subroutineBody')
+      var_decs = children_by_name(body_ast, 'varDec')
+      inst = "function #{classname}.#{name} #{var_decs.length}"
+      state[:instructions] << inst
+
+      var_decs.each do |dec|
+        c_subroutine_var_dec(dec)
+      end
+    end
+
+    def c_subroutine_var_dec(ast)
+      name, type, kind = c_var_dec(ast).values
+      subroutine_table.define(name: name, type: type, kind: kind)
+    end
+
+    def c_class_var_dec(ast)
+      name, type, kind = c_var_dec(ast).values
+      class_table.define(name: name, type: type, kind: kind)
+    end
+
+    def c_var_dec(ast)
+      kind = ast[:values][0][:value]
+      type = ast[:values][1][:values][0][:value]
+      name = ast[:values][2][:values][0][:values][0][:value]
+
+      {name: name, type: type, kind: kind}
+    end
+
+    def children_by_name(ast, name)
+      ast[:values].select { |v| v[:name] == name }
+    end
+
+    def child_by_name(ast, name)
+      ast[:values].find { |v| v[:name] == name }
     end
   end
 end
