@@ -73,6 +73,66 @@ module Jack
       var_decs.each do |dec|
         c_subroutine_var_dec(dec)
       end
+
+      statements = child_by_name(body_ast, 'statements')[:values]
+      statements.each do |s|
+        c_statement(s)
+      end
+    end
+
+    def c_statement(ast)
+      statement = ast[:values][0]
+      type = statement[:name]
+
+      case type
+      when 'letStatement'
+        c_let_statement(statement)
+      end
+    end
+
+    def c_let_statement(ast)
+      values = ast[:values]
+      symbol = values[1][:values][0][:values][0][:value]
+      expression = values[3]
+      c_expression(expression)
+    end
+
+    def c_expression(ast)
+      # pp '-----------'
+      # pp ast
+      # pp '-----------'
+
+      sub_exps = ast[:values]
+
+      exp_n = sub_exps.length
+      is_group = exp_n == 1 &&
+                 sub_exps[0][:values].length == 3 &&
+                 sub_exps[0][:values][0][:value] == '('
+      is_number = exp_n == 1 &&
+                  sub_exps[0][:values].length == 1 &&
+                  sub_exps[0][:values][0][:name] == 'integerConstant'
+      is_var = exp_n == 1 &&
+               sub_exps[0][:values].length == 1 &&
+               sub_exps[0][:values][0][:name] == 'varName'
+      is_combo = exp_n >= 3 &&
+                 sub_exps[1][:name] == 'op'
+
+      if is_number
+        number = sub_exps[0][:values][0][:values][0][:value]
+        state[:instructions] << "push #{number}"
+      elsif is_var
+        var = sub_exps[0][:values][0][:values][0][:values][0][:value]
+        state[:instructions] << "push #{var}" # scar de symboltable
+      elsif is_group
+        new_exps = sub_exps[0][:values][1]
+        c_expression(new_exps)
+      elsif is_combo
+        op = sub_exps[1][:values][0][:value]
+
+        c_expression({ values: [sub_exps[0]] })
+        c_expression({ values: sub_exps[2..] })
+        state[:instructions] << op
+      end
     end
 
     def c_subroutine_var_dec(ast)
@@ -90,7 +150,7 @@ module Jack
       type = ast[:values][1][:values][0][:value]
       name = ast[:values][2][:values][0][:values][0][:value]
 
-      {name: name, type: type, kind: kind}
+      { name: name, type: type, kind: kind }
     end
 
     def children_by_name(ast, name)

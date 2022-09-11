@@ -1,13 +1,15 @@
 module Jack
   class SymbolTable < Hash
-    # attr_accessor :table
+    attr_accessor :index_table
 
     def initialize
-      # @table = {}
+      @index_table = {}
     end
 
     def define(name:, type:, kind:)
-      self[name] = { name: name, type: type, kind: kind }
+      current_index = index_table[kind] || 0
+      self[name] = { name: name, type: type, kind: kind, index: current_index }
+      index_table[kind] = current_index + 1
     end
 
     def refresh
