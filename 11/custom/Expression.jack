@@ -5,10 +5,12 @@ class Main {
 
     method void expr() {
         var int x;
-        let a = 1;
-        let b = 2;
-        let c = a + (b * (b - a)) + a;
+        // let a = 1;
+        // let x = -a;
+        // let b = 2;
+        // let c = a + (b * (b - a)) + a;
 
+        let a = -x + 1;
         return;
     }
 }

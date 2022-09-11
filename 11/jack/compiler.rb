@@ -105,6 +105,9 @@ module Jack
       sub_exps = ast[:values]
 
       exp_n = sub_exps.length
+      is_unary = exp_n == 1 &&
+                 sub_exps[0][:values].length == 2 &&
+                 sub_exps[0][:values][0][:name] == 'unaryOp'
       is_group = exp_n == 1 &&
                  sub_exps[0][:values].length == 3 &&
                  sub_exps[0][:values][0][:value] == '('
@@ -126,6 +129,13 @@ module Jack
       elsif is_group
         new_exps = sub_exps[0][:values][1]
         c_expression(new_exps)
+      elsif is_unary
+        op = sub_exps[0][:values][0][:values][0][:value]
+        term = sub_exps[0][:values][1]
+        c_expression({ values: [term] })
+        newOp = { '-' => 'neg', '~' => 'not' }[op]
+
+        state[:instructions] << newOp
       elsif is_combo
         op = sub_exps[1][:values][0][:value]
 

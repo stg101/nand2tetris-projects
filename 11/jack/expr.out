@@ -105,139 +105,35 @@
                       [{:name=>"term",
                         :code=>"term_L36",
                         :values=>
-                         [{:name=>"integerConstant",
-                           :code=>"integerConstant_L37",
+                         [{:name=>"unaryOp",
+                           :code=>"unaryOp_L51",
+                           :values=>[{:name=>"symbol", :value=>"-"}]},
+                          {:name=>"term",
+                           :code=>"term_L52",
                            :values=>
-                            [{:name=>"integerConstant", :value=>"1"}]}]}]},
-                    {:name=>"symbol", :value=>";"}]}]},
-              {:name=>"statement",
-               :code=>"statement_L39",
-               :values=>
-                [{:name=>"letStatement",
-                  :code=>"letStatement_L40",
-                  :values=>
-                   [{:name=>"keyword", :value=>"let"},
-                    {:name=>"varName",
-                     :code=>"varName_L41",
-                     :values=>
-                      [{:name=>"identifier",
-                        :code=>"identifier_L42",
-                        :values=>[{:name=>"identifier", :value=>"b"}]}]},
-                    {:name=>"symbol", :value=>"="},
-                    {:name=>"expression",
-                     :code=>"expression_L43",
-                     :values=>
-                      [{:name=>"term",
-                        :code=>"term_L44",
-                        :values=>
-                         [{:name=>"integerConstant",
-                           :code=>"integerConstant_L45",
-                           :values=>
-                            [{:name=>"integerConstant", :value=>"2"}]}]}]},
-                    {:name=>"symbol", :value=>";"}]}]},
-              {:name=>"statement",
-               :code=>"statement_L47",
-               :values=>
-                [{:name=>"letStatement",
-                  :code=>"letStatement_L48",
-                  :values=>
-                   [{:name=>"keyword", :value=>"let"},
-                    {:name=>"varName",
-                     :code=>"varName_L49",
-                     :values=>
-                      [{:name=>"identifier",
-                        :code=>"identifier_L50",
-                        :values=>[{:name=>"identifier", :value=>"c"}]}]},
-                    {:name=>"symbol", :value=>"="},
-                    {:name=>"expression",
-                     :code=>"expression_L51",
-                     :values=>
-                      [{:name=>"term",
-                        :code=>"term_L52",
-                        :values=>
-                         [{:name=>"varName",
-                           :code=>"varName_L63",
-                           :values=>
-                            [{:name=>"identifier",
-                              :code=>"identifier_L64",
+                            [{:name=>"varName",
+                              :code=>"varName_L63",
                               :values=>
-                               [{:name=>"identifier", :value=>"a"}]}]}]},
+                               [{:name=>"identifier",
+                                 :code=>"identifier_L64",
+                                 :values=>
+                                  [{:name=>"identifier", :value=>"x"}]}]}]}]},
                        {:name=>"op",
                         :code=>"op_L65",
                         :values=>[{:name=>"symbol", :value=>"+"}]},
                        {:name=>"term",
                         :code=>"term_L66",
                         :values=>
-                         [{:name=>"symbol", :value=>"("},
-                          {:name=>"expression",
-                           :code=>"expression_L81",
+                         [{:name=>"integerConstant",
+                           :code=>"integerConstant_L67",
                            :values=>
-                            [{:name=>"term",
-                              :code=>"term_L82",
-                              :values=>
-                               [{:name=>"varName",
-                                 :code=>"varName_L93",
-                                 :values=>
-                                  [{:name=>"identifier",
-                                    :code=>"identifier_L94",
-                                    :values=>
-                                     [{:name=>"identifier", :value=>"b"}]}]}]},
-                             {:name=>"op",
-                              :code=>"op_L95",
-                              :values=>[{:name=>"symbol", :value=>"*"}]},
-                             {:name=>"term",
-                              :code=>"term_L96",
-                              :values=>
-                               [{:name=>"symbol", :value=>"("},
-                                {:name=>"expression",
-                                 :code=>"expression_L111",
-                                 :values=>
-                                  [{:name=>"term",
-                                    :code=>"term_L112",
-                                    :values=>
-                                     [{:name=>"varName",
-                                       :code=>"varName_L123",
-                                       :values=>
-                                        [{:name=>"identifier",
-                                          :code=>"identifier_L124",
-                                          :values=>
-                                           [{:name=>"identifier",
-                                             :value=>"b"}]}]}]},
-                                   {:name=>"op",
-                                    :code=>"op_L125",
-                                    :values=>[{:name=>"symbol", :value=>"-"}]},
-                                   {:name=>"term",
-                                    :code=>"term_L126",
-                                    :values=>
-                                     [{:name=>"varName",
-                                       :code=>"varName_L137",
-                                       :values=>
-                                        [{:name=>"identifier",
-                                          :code=>"identifier_L138",
-                                          :values=>
-                                           [{:name=>"identifier",
-                                             :value=>"a"}]}]}]}]},
-                                {:name=>"symbol", :value=>")"}]}]},
-                          {:name=>"symbol", :value=>")"}]},
-                       {:name=>"op",
-                        :code=>"op_L141",
-                        :values=>[{:name=>"symbol", :value=>"+"}]},
-                       {:name=>"term",
-                        :code=>"term_L142",
-                        :values=>
-                         [{:name=>"varName",
-                           :code=>"varName_L153",
-                           :values=>
-                            [{:name=>"identifier",
-                              :code=>"identifier_L154",
-                              :values=>
-                               [{:name=>"identifier", :value=>"a"}]}]}]}]},
+                            [{:name=>"integerConstant", :value=>"1"}]}]}]},
                     {:name=>"symbol", :value=>";"}]}]},
               {:name=>"statement",
-               :code=>"statement_L156",
+               :code=>"statement_L69",
                :values=>
                 [{:name=>"returnStatement",
-                  :code=>"returnStatement_L161",
+                  :code=>"returnStatement_L74",
                   :values=>
                    [{:name=>"keyword", :value=>"return"},
                     {:name=>"symbol", :value=>";"}]}]}]},
