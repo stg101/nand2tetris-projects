@@ -90,11 +90,12 @@ module Jack
       end
     end
 
-    def c_let_statement(ast)
+    def c_let_statement(ast) # TODO: argument variables
       values = ast[:values]
-      symbol = values[1][:values][0][:values][0][:value]
       expression = values[3]
       c_expression(expression)
+      symbol = values[1][:values][0][:values][0][:value]
+      state[:instructions] << "pop #{c_symbol(symbol)}"
     end
 
     def c_expression(ast)
