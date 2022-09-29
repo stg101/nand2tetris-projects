@@ -125,7 +125,7 @@ module Jack
         state[:instructions] << "push #{number}"
       elsif is_var
         var = sub_exps[0][:values][0][:values][0][:values][0][:value]
-        state[:instructions] << "push #{var}" # scar de symboltable
+        state[:instructions] << "push #{c_symbol(var)}" # scar de symboltable
       elsif is_group
         new_exps = sub_exps[0][:values][1]
         c_expression(new_exps)
@@ -145,6 +145,11 @@ module Jack
       end
     end
 
+    def c_symbol(symbol)
+      symbol_data = subroutine_table[symbol] || class_table[symbol]
+      "#{symbol_data[:kind]} #{symbol_data[:index]}"
+    end
+
     def c_subroutine_var_dec(ast)
       name, type, kind = c_var_dec(ast).values
       subroutine_table.define(name: name, type: type, kind: kind)
@@ -157,6 +162,7 @@ module Jack
 
     def c_var_dec(ast)
       kind = ast[:values][0][:value]
+      kind = 'local' if kind == 'var'
       type = ast[:values][1][:values][0][:value]
       name = ast[:values][2][:values][0][:values][0][:value]
 
