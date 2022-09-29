@@ -87,7 +87,26 @@ module Jack
       case type
       when 'letStatement'
         c_let_statement(statement)
+      when 'doStatement'
+        c_do_statement(statement)
       end
+    end
+
+    def c_do_statement(ast)
+      address = %w[subroutineCall expressionList]
+      expression_list = drill_by_names(ast, address)
+
+      address = %w[subroutineCall className identifier identifier]
+      class_name = drill_by_names(ast, address)[:value]
+
+      address = %w[subroutineCall subroutineName identifier identifier]
+      subroutine_name = drill_by_names(ast, address)[:value]
+
+      full_name = [class_name, subroutine_name].join('.')
+
+      c_expression_list(expression_list)
+      argument_count = expression_list[:values].length
+      state[:instructions] << "call #{full_name} #{argument_count}"
     end
 
     def c_let_statement(ast) # TODO: argument variables
@@ -96,6 +115,12 @@ module Jack
       c_expression(expression)
       symbol = values[1][:values][0][:values][0][:value]
       state[:instructions] << "pop #{c_symbol(symbol)}"
+    end
+
+    def c_expression_list(ast)
+      ast[:values].each do |exp|
+        c_expression(exp)
+      end
     end
 
     def c_expression(ast)
@@ -123,7 +148,7 @@ module Jack
 
       if is_number
         number = sub_exps[0][:values][0][:values][0][:value]
-        state[:instructions] << "push #{number}"
+        state[:instructions] << "push constant #{number}"
       elsif is_var
         var = sub_exps[0][:values][0][:values][0][:values][0][:value]
         state[:instructions] << "push #{c_symbol(var)}" # scar de symboltable
@@ -176,6 +201,14 @@ module Jack
 
     def child_by_name(ast, name)
       ast[:values].find { |v| v[:name] == name }
+    end
+
+    def drill_by_names(ast, names)
+      current = ast
+      names.each do |n|
+        current = child_by_name(current, n)
+      end
+      current
     end
   end
 end
