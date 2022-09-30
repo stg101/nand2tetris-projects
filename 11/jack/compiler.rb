@@ -92,6 +92,8 @@ module Jack
       when 'returnStatement'
         c_return_statement(statement)
       end
+
+      # TODO: Add flow control statements
     end
 
     def c_return_statement(ast)
@@ -101,24 +103,33 @@ module Jack
     end
 
     def c_do_statement(ast)
-      address = %w[subroutineCall expressionList]
-      expression_list = drill_by_names(ast, address)
+      subroutine_ast = child_by_name(ast, 'subroutineCall')
+      c_subroutine_call(subroutine_ast)
+      state[:instructions] << 'pop temp 0'
+    end
 
-      address = %w[subroutineCall className identifier identifier]
+    def c_subroutine_call(ast)
+      address = %w[expressionList]
+      expression_list_ast = drill_by_names(ast, address)
+
+      address = %w[className identifier identifier]
       class_name = drill_by_names(ast, address)[:value]
 
-      address = %w[subroutineCall subroutineName identifier identifier]
+      address = %w[subroutineName identifier identifier]
       subroutine_name = drill_by_names(ast, address)[:value]
 
       full_name = [class_name, subroutine_name].join('.')
 
-      c_expression_list(expression_list)
-      argument_count = expression_list[:values].length
+      c_expression_list(expression_list_ast)
+      expressions_count = expression_list_ast[:values].count { |x| x[:value] != ',' }
+      argument_count = expressions_count
       state[:instructions] << "call #{full_name} #{argument_count}"
-      state[:instructions] << 'pop temp 0'
     end
 
     def c_let_statement(ast) # TODO: argument variables
+      # pp '******'
+      # pp ast
+
       values = ast[:values]
       expression = values[3]
       c_expression(expression)
@@ -127,7 +138,12 @@ module Jack
     end
 
     def c_expression_list(ast)
+      # pp '******'
+      # pp ast
+
       ast[:values].each do |exp|
+        next if exp[:value] == ','
+
         c_expression(exp)
       end
     end
@@ -136,6 +152,13 @@ module Jack
       # pp '-----------'
       # pp ast
       # pp '-----------'
+
+      compare_simple_value = lambda do |exps, type|
+        exp_n = exps.length
+        exp_n == 1 &&
+          exps[0][:values].length == 1 &&
+          exps[0][:values][0][:name] == type
+      end
 
       sub_exps = ast[:values]
 
@@ -146,9 +169,9 @@ module Jack
       is_group = exp_n == 1 &&
                  sub_exps[0][:values].length == 3 &&
                  sub_exps[0][:values][0][:value] == '('
-      is_number = exp_n == 1 &&
-                  sub_exps[0][:values].length == 1 &&
-                  sub_exps[0][:values][0][:name] == 'integerConstant'
+      is_number = compare_simple_value.call(sub_exps, 'integerConstant')
+      is_subroutine_call = compare_simple_value.call(sub_exps, 'subroutineCall')
+
       is_var = exp_n == 1 &&
                sub_exps[0][:values].length == 1 &&
                sub_exps[0][:values][0][:name] == 'varName'
@@ -164,6 +187,10 @@ module Jack
       elsif is_group
         new_exps = sub_exps[0][:values][1]
         c_expression(new_exps)
+      elsif is_subroutine_call
+        address = ['term', 'subroutineCall']
+        subroutine_call_ast = drill_by_names(ast, address)
+        c_subroutine_call(subroutine_call_ast)
       elsif is_unary
         op = sub_exps[0][:values][0][:values][0][:value]
         term = sub_exps[0][:values][1]
