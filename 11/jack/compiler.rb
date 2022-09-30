@@ -89,7 +89,15 @@ module Jack
         c_let_statement(statement)
       when 'doStatement'
         c_do_statement(statement)
+      when 'returnStatement'
+        c_return_statement(statement)
       end
+    end
+
+    def c_return_statement(ast)
+      is_empty_return = ast[:values].length == 2
+      state[:instructions] << 'push constant 0' if is_empty_return
+      state[:instructions] << 'return'
     end
 
     def c_do_statement(ast)
@@ -107,6 +115,7 @@ module Jack
       c_expression_list(expression_list)
       argument_count = expression_list[:values].length
       state[:instructions] << "call #{full_name} #{argument_count}"
+      state[:instructions] << 'pop temp 0'
     end
 
     def c_let_statement(ast) # TODO: argument variables
