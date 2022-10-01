@@ -68,7 +68,7 @@ module Jack
       body_ast = child_by_name(ast, 'subroutineBody')
       var_decs = children_by_name(body_ast, 'varDec')
       inst = "function #{classname}.#{name} #{var_decs.length}"
-      state[:instructions] << inst
+      push_instruction inst
 
       var_decs.each do |dec|
         c_subroutine_var_dec(dec)
@@ -91,21 +91,42 @@ module Jack
         c_do_statement(statement)
       when 'returnStatement'
         c_return_statement(statement)
+      when 'ifStatement'
+        c_if_statement(statement)
       end
 
       # TODO: Add flow control statements
     end
 
+    def c_if_statement(ast)
+      label_1 = unique_label('L1-if')
+      label_2 = unique_label('L2-if')
+      # pp '******'
+      # pp ast
+      # pp '******'
+      if_statements, else_statements = children_by_name(ast, 'statements')
+
+      condition_ast = child_by_name(ast, 'expression')
+      c_expression(condition_ast)
+      push_instruction('not')
+      push_instruction("if-goto #{label_1}")
+      if_statements[:values].each { |s| c_statement(s)}
+      push_instruction("goto #{label_2}")
+      push_instruction("label #{label_1}")
+      else_statements[:values].each { |s| c_statement(s)}
+      push_instruction("label #{label_2}")
+    end
+
     def c_return_statement(ast)
       is_empty_return = ast[:values].length == 2
-      state[:instructions] << 'push constant 0' if is_empty_return
-      state[:instructions] << 'return'
+      push_instruction 'push constant 0' if is_empty_return
+      push_instruction 'return'
     end
 
     def c_do_statement(ast)
       subroutine_ast = child_by_name(ast, 'subroutineCall')
       c_subroutine_call(subroutine_ast)
-      state[:instructions] << 'pop temp 0'
+      push_instruction 'pop temp 0'
     end
 
     def c_subroutine_call(ast)
@@ -123,7 +144,7 @@ module Jack
       c_expression_list(expression_list_ast)
       expressions_count = expression_list_ast[:values].count { |x| x[:value] != ',' }
       argument_count = expressions_count
-      state[:instructions] << "call #{full_name} #{argument_count}"
+      push_instruction "call #{full_name} #{argument_count}"
     end
 
     def c_let_statement(ast) # TODO: argument variables
@@ -134,7 +155,7 @@ module Jack
       expression = values[3]
       c_expression(expression)
       symbol = values[1][:values][0][:values][0][:value]
-      state[:instructions] << "pop #{c_symbol(symbol)}"
+      push_instruction "pop #{c_symbol(symbol)}"
     end
 
     def c_expression_list(ast)
@@ -180,10 +201,10 @@ module Jack
 
       if is_number
         number = sub_exps[0][:values][0][:values][0][:value]
-        state[:instructions] << "push constant #{number}"
+        push_instruction "push constant #{number}"
       elsif is_var
         var = sub_exps[0][:values][0][:values][0][:values][0][:value]
-        state[:instructions] << "push #{c_symbol(var)}" # scar de symboltable
+        push_instruction "push #{c_symbol(var)}" # scar de symboltable
       elsif is_group
         new_exps = sub_exps[0][:values][1]
         c_expression(new_exps)
@@ -197,13 +218,13 @@ module Jack
         c_expression({ values: [term] })
         newOp = { '-' => 'neg', '~' => 'not' }[op]
 
-        state[:instructions] << newOp
+        push_instruction newOp
       elsif is_combo
         op = sub_exps[1][:values][0][:value]
 
         c_expression({ values: [sub_exps[0]] })
         c_expression({ values: sub_exps[2..] })
-        state[:instructions] << op
+        push_instruction op
       end
     end
 
@@ -229,6 +250,16 @@ module Jack
       name = ast[:values][2][:values][0][:values][0][:value]
 
       { name: name, type: type, kind: kind }
+    end
+
+    def unique_label(prefix)
+      @unique_ids = {} if !@unique_ids
+      @unique_ids[prefix] = @unique_ids[prefix] ? @unique_ids[prefix] + 1 : 0
+      "#{prefix}-#{@unique_ids[prefix]}"
+    end
+
+    def push_instruction(inst)
+      state[:instructions] << inst
     end
 
     def children_by_name(ast, name)
