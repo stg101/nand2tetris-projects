@@ -93,28 +93,45 @@ module Jack
         c_return_statement(statement)
       when 'ifStatement'
         c_if_statement(statement)
+      when 'whileStatement'
+        c_while_statement(statement)
       end
-
-      # TODO: Add flow control statements
     end
 
-    def c_if_statement(ast)
-      label_1 = unique_label('L1-if')
-      label_2 = unique_label('L2-if')
+    def c_while_statement(ast)
       # pp '******'
       # pp ast
       # pp '******'
+      label1 = unique_label('L1-while')
+      label2 = unique_label('L2-while')
+
+      condition_ast = child_by_name(ast, 'expression')
+      statements_ast = child_by_name(ast, 'statements')
+
+      push_instruction("label #{label1}")
+      c_expression(condition_ast)
+      push_instruction('not')
+      push_instruction("if-goto #{label2}")
+      statements_ast[:values].each { |s| c_statement(s) }
+      push_instruction("goto #{label1}")
+      push_instruction("label #{label2}")
+    end
+
+    def c_if_statement(ast)
+      label1 = unique_label('L1-if')
+      label2 = unique_label('L2-if')
+
       if_statements, else_statements = children_by_name(ast, 'statements')
 
       condition_ast = child_by_name(ast, 'expression')
       c_expression(condition_ast)
       push_instruction('not')
-      push_instruction("if-goto #{label_1}")
-      if_statements[:values].each { |s| c_statement(s)}
-      push_instruction("goto #{label_2}")
-      push_instruction("label #{label_1}")
-      else_statements[:values].each { |s| c_statement(s)}
-      push_instruction("label #{label_2}")
+      push_instruction("if-goto #{label1}")
+      if_statements[:values].each { |s| c_statement(s) }
+      push_instruction("goto #{label2}")
+      push_instruction("label #{label1}")
+      else_statements[:values].each { |s| c_statement(s) }
+      push_instruction("label #{label2}")
     end
 
     def c_return_statement(ast)
@@ -191,8 +208,8 @@ module Jack
                  sub_exps[0][:values].length == 3 &&
                  sub_exps[0][:values][0][:value] == '('
       is_number = compare_simple_value.call(sub_exps, 'integerConstant')
+      is_keyword_const = compare_simple_value.call(sub_exps, 'keywordConstant')
       is_subroutine_call = compare_simple_value.call(sub_exps, 'subroutineCall')
-
       is_var = exp_n == 1 &&
                sub_exps[0][:values].length == 1 &&
                sub_exps[0][:values][0][:name] == 'varName'
@@ -202,6 +219,9 @@ module Jack
       if is_number
         number = sub_exps[0][:values][0][:values][0][:value]
         push_instruction "push constant #{number}"
+      elsif is_keyword_const
+        keyword_const = drill_by_names(ast, ['term', 'keywordConstant', 'keyword'])[:value]
+        push_instruction "push constant #{keyword_const}"
       elsif is_var
         var = sub_exps[0][:values][0][:values][0][:values][0][:value]
         push_instruction "push #{c_symbol(var)}" # scar de symboltable
@@ -209,7 +229,7 @@ module Jack
         new_exps = sub_exps[0][:values][1]
         c_expression(new_exps)
       elsif is_subroutine_call
-        address = ['term', 'subroutineCall']
+        address = %w[term subroutineCall]
         subroutine_call_ast = drill_by_names(ast, address)
         c_subroutine_call(subroutine_call_ast)
       elsif is_unary
@@ -234,26 +254,25 @@ module Jack
     end
 
     def c_subroutine_var_dec(ast)
-      name, type, kind = c_var_dec(ast).values
-      subroutine_table.define(name: name, type: type, kind: kind)
+      c_var_dec(subroutine_table, ast)
     end
 
     def c_class_var_dec(ast)
-      name, type, kind = c_var_dec(ast).values
-      class_table.define(name: name, type: type, kind: kind)
+      c_var_dec(class_table, ast)
     end
 
-    def c_var_dec(ast)
+    def c_var_dec(table, ast)
       kind = ast[:values][0][:value]
       kind = 'local' if kind == 'var'
       type = ast[:values][1][:values][0][:value]
-      name = ast[:values][2][:values][0][:values][0][:value]
-
-      { name: name, type: type, kind: kind }
+      children_by_name(ast, 'varName').map do |vn|
+        name = drill_by_names(vn, %w[identifier identifier])[:value]
+        table.define(name: name, type: type, kind: kind)
+      end
     end
 
     def unique_label(prefix)
-      @unique_ids = {} if !@unique_ids
+      @unique_ids ||= {}
       @unique_ids[prefix] = @unique_ids[prefix] ? @unique_ids[prefix] + 1 : 0
       "#{prefix}-#{@unique_ids[prefix]}"
     end
