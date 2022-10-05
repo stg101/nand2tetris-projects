@@ -60,13 +60,16 @@ module Jack
       end
     end
 
-    def c_subroutine_dec(ast)
+    def c_subroutine_dec(ast) # TODO: add this argument
       subroutine_table.refresh
-      name = ast[:values][0][:value]
+      name = drill_by_names(ast, %w[subroutineName identifier identifier])[:value]
       classname = state[:classname]
 
       body_ast = child_by_name(ast, 'subroutineBody')
+      params_ast = child_by_name(ast, 'parameterList')
       var_decs = children_by_name(body_ast, 'varDec')
+
+      c_parameter_list(params_ast)
       inst = "function #{classname}.#{name} #{var_decs.length}"
       push_instruction inst
 
@@ -121,7 +124,10 @@ module Jack
       label1 = unique_label('L1-if')
       label2 = unique_label('L2-if')
 
-      if_statements, else_statements = children_by_name(ast, 'statements')
+      condidion_bodies = children_by_name(ast, 'statements')
+
+      if_statements = condidion_bodies[0]
+      else_statements = condidion_bodies[1]
 
       condition_ast = child_by_name(ast, 'expression')
       c_expression(condition_ast)
@@ -130,7 +136,7 @@ module Jack
       if_statements[:values].each { |s| c_statement(s) }
       push_instruction("goto #{label2}")
       push_instruction("label #{label1}")
-      else_statements[:values].each { |s| c_statement(s) }
+      else_statements[:values].each { |s| c_statement(s) } if else_statements
       push_instruction("label #{label2}")
     end
 
@@ -220,7 +226,7 @@ module Jack
         number = sub_exps[0][:values][0][:values][0][:value]
         push_instruction "push constant #{number}"
       elsif is_keyword_const
-        keyword_const = drill_by_names(ast, ['term', 'keywordConstant', 'keyword'])[:value]
+        keyword_const = drill_by_names(ast, %w[term keywordConstant keyword])[:value]
         push_instruction "push constant #{keyword_const}"
       elsif is_var
         var = sub_exps[0][:values][0][:values][0][:values][0][:value]
@@ -251,6 +257,22 @@ module Jack
     def c_symbol(symbol)
       symbol_data = subroutine_table[symbol] || class_table[symbol]
       "#{symbol_data[:kind]} #{symbol_data[:index]}"
+    end
+
+    def c_parameter_list(ast)
+      return if ast.nil?
+
+      types = children_by_name(ast, 'type').map do |vn|
+        vn[:values][0][:value]
+      end
+      names = children_by_name(ast, 'varName').map do |vn|
+        drill_by_names(vn, %w[identifier identifier])[:value]
+      end
+
+      names.each_with_index do |name, index|
+        type = types[index]
+        subroutine_table.define(name: name, type: type, kind: 'argument')
+      end
     end
 
     def c_subroutine_var_dec(ast)

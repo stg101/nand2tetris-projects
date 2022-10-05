@@ -14,6 +14,7 @@ module Jack
 
     def refresh
       clear
+      index_table.clear
     end
   end
 end
