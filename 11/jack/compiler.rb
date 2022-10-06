@@ -107,8 +107,8 @@ module Jack
       # pp '******'
       # pp ast
       # pp '******'
-      label1 = unique_label('L1-while')
-      label2 = unique_label('L2-while')
+      label1 = unique_label('L1while')
+      label2 = unique_label('L2while')
 
       condition_ast = child_by_name(ast, 'expression')
       statements_ast = child_by_name(ast, 'statements')
@@ -123,8 +123,8 @@ module Jack
     end
 
     def c_if_statement(ast)
-      label1 = unique_label('L1-if')
-      label2 = unique_label('L2-if')
+      label1 = unique_label('L1if')
+      label2 = unique_label('L2if')
 
       condidion_bodies = children_by_name(ast, 'statements')
 
@@ -310,7 +310,7 @@ module Jack
     def unique_label(prefix)
       @unique_ids ||= {}
       @unique_ids[prefix] = @unique_ids[prefix] ? @unique_ids[prefix] + 1 : 0
-      "#{prefix}-#{@unique_ids[prefix]}"
+      "#{prefix}#{@unique_ids[prefix]}"
     end
 
     def push_instruction(inst)

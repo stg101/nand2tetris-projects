@@ -16,10 +16,10 @@ return
 function Main.convert 2
 push constant 32767
 pop local 2
-label L1-while-0
+label L1while0
 push local 2
 not
-if-goto L2-while-0
+if-goto L2while0
 push local 1
 push constant 1
 add
@@ -32,7 +32,7 @@ push constant 16
 gt
 not
 not
-if-goto L1-if-0
+if-goto L1if0
 push argument 0
 push local 0
 and
@@ -40,29 +40,29 @@ push constant 0
 eq
 not
 not
-if-goto L1-if-1
+if-goto L1if1
 push constant 8000
 push local 1
 add
 push constant 1
 call Memory.poke 2
 pop temp 0
-goto L2-if-1
-label L1-if-1
+goto L2if1
+label L1if1
 push constant 8000
 push local 1
 add
 push constant 0
 call Memory.poke 2
 pop temp 0
-label L2-if-1
-goto L2-if-0
-label L1-if-0
+label L2if1
+goto L2if0
+label L1if0
 push constant 0
 pop local 2
-label L2-if-0
-goto L1-while-0
-label L2-while-0
+label L2if0
+goto L1while0
+label L2while0
 push constant 0
 return
 function Main.nextMask 0
@@ -70,19 +70,19 @@ push argument 0
 push constant 0
 eq
 not
-if-goto L1-if-2
+if-goto L1if2
 return
-goto L2-if-2
-label L1-if-2
+goto L2if2
+label L1if2
 return
-label L2-if-2
+label L2if2
 function Main.fillMemory 0
-label L1-while-1
+label L1while1
 push argument 1
 push constant 0
 gt
 not
-if-goto L2-while-1
+if-goto L2while1
 push argument 0
 push argument 2
 call Memory.poke 2
@@ -95,7 +95,7 @@ push argument 0
 push constant 1
 add
 pop argument 0
-goto L1-while-1
-label L2-while-1
+goto L1while1
+label L2while1
 push constant 0
 return
