@@ -72,12 +72,13 @@ module Jack
       var_decs = children_by_name(body_ast, 'varDec')
 
       c_parameter_list(params_ast)
-      inst = "function #{classname}.#{name} #{var_decs.length}"
-      push_instruction inst
-
       var_decs.each do |dec|
         c_subroutine_var_dec(dec)
       end
+
+      local_vars_count = subroutine_table.count_by_kind('local')
+      inst = "function #{classname}.#{name} #{local_vars_count}"
+      push_instruction inst
 
       statements = child_by_name(body_ast, 'statements')[:values]
       statements.each do |s|

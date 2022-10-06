@@ -12,6 +12,10 @@ module Jack
       index_table[kind] = current_index + 1
     end
 
+    def count_by_kind(kind)
+      values.select { |var| var[:kind] == kind }.length
+    end
+
     def refresh
       clear
       index_table.clear
