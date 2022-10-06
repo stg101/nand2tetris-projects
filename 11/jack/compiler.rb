@@ -22,9 +22,11 @@ module Jack
     end
 
     def compile
-      internal_paths.map do |path|
+      internal_paths.each do |path|
         file = File.open(path)
-        compile_file(file)
+        vm_path = path.delete_suffix('.jack').concat('.vm')
+        vm_code = compile_file(file).join("\n")
+        File.open(vm_path, 'w') { |f| f.write vm_code }
       end
     end
 
@@ -242,21 +244,32 @@ module Jack
         op = sub_exps[0][:values][0][:values][0][:value]
         term = sub_exps[0][:values][1]
         c_expression({ values: [term] })
-        newOp = { '-' => 'neg', '~' => 'not' }[op]
-
-        push_instruction newOp
+        push_instruction map_operator(op, unary: true)
       elsif is_combo
         op = sub_exps[1][:values][0][:value]
 
         c_expression({ values: [sub_exps[0]] })
         c_expression({ values: sub_exps[2..] })
-        push_instruction op
+        push_instruction map_operator(op)
       end
     end
 
     def c_symbol(symbol)
       symbol_data = subroutine_table[symbol] || class_table[symbol]
       "#{symbol_data[:kind]} #{symbol_data[:index]}"
+    end
+
+    def map_operator(op, unary: false)
+      return { '-' => 'neg', '~' => 'not' }[op] if unary
+
+      { '-' => 'sub',
+        '+' => 'add',
+        '*' => 'call Math.multiply 2',
+        '=' => 'eq',
+        '>' => 'gt',
+        '<' => 'lt',
+        '&' => 'and',
+        '|' => 'or' }[op]
     end
 
     def c_parameter_list(ast)
