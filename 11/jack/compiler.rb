@@ -145,7 +145,11 @@ module Jack
 
     def c_return_statement(ast)
       is_empty_return = ast[:values].length == 2
-      push_instruction 'push constant 0' if is_empty_return
+      if is_empty_return
+        push_instruction 'push constant 0'
+      else
+        c_expression child_by_name(ast, 'expression')
+      end
       push_instruction 'return'
     end
 

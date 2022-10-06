@@ -72,9 +72,13 @@ push constant 0
 eq
 not
 if-goto L1if2
+push constant 1
 return
 goto L2if2
 label L1if2
+push argument 0
+push constant 2
+call Math.multiply 2
 return
 label L2if2
 function Main.fillMemory 0
