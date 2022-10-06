@@ -229,7 +229,7 @@ module Jack
         push_instruction "push constant #{number}"
       elsif is_keyword_const
         keyword_const = drill_by_names(ast, %w[term keywordConstant keyword])[:value]
-        value = { 'true' => '1111111111111111', 'false' => '0' }[keyword_const] || keyword_const
+        value = { 'true' => '32767', 'false' => '0' }[keyword_const] || keyword_const
         push_instruction "push constant #{value}"
       elsif is_var
         var = sub_exps[0][:values][0][:values][0][:values][0][:value]
