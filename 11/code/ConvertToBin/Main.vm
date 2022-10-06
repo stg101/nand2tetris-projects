@@ -14,7 +14,8 @@ pop temp 0
 push constant 0
 return
 function Main.convert 3
-push constant 32767
+push constant 1
+neg
 pop local 2
 label L1while0
 push local 2
