@@ -14,7 +14,7 @@ pop temp 0
 push constant 0
 return
 function Main.convert 2
-push constant true
+push constant -1
 pop local 2
 label L1-while-0
 push local 2
@@ -58,7 +58,7 @@ pop temp 0
 label L2-if-1
 goto L2-if-0
 label L1-if-0
-push constant false
+push constant 0
 pop local 2
 label L2-if-0
 goto L1-while-0

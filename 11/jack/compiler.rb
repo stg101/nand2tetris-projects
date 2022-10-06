@@ -229,7 +229,8 @@ module Jack
         push_instruction "push constant #{number}"
       elsif is_keyword_const
         keyword_const = drill_by_names(ast, %w[term keywordConstant keyword])[:value]
-        push_instruction "push constant #{keyword_const}"
+        value = { 'true' => '-1', 'false' => '0' }[keyword_const] || keyword_const
+        push_instruction "push constant #{value}"
       elsif is_var
         var = sub_exps[0][:values][0][:values][0][:values][0][:value]
         push_instruction "push #{c_symbol(var)}" # scar de symboltable
