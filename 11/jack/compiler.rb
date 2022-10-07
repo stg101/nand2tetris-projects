@@ -11,9 +11,6 @@ module Jack
       @grammar_file = File.open("#{__dir__}/parser_grammar.yml")
       @class_table =  SymbolTable.new
       @subroutine_table = SymbolTable.new
-      # @instructions = []
-      # @file = File.open(path)
-      # @analizer = Analizer.new(file)
 
       @state = {
         classname: '',
@@ -63,7 +60,9 @@ module Jack
     end
 
     def c_subroutine_dec(ast) # TODO: add this argument
+      # pp ast
       subroutine_table.refresh
+      type = child_by_name(ast, 'keyword')[:value]
       name = drill_by_names(ast, %w[subroutineName identifier identifier])[:value]
       classname = state[:classname]
 
@@ -72,6 +71,7 @@ module Jack
       var_decs = children_by_name(body_ast, 'varDec')
 
       c_parameter_list(params_ast)
+
       var_decs.each do |dec|
         c_subroutine_var_dec(dec)
       end
@@ -80,10 +80,21 @@ module Jack
       inst = "function #{classname}.#{name} #{local_vars_count}"
       push_instruction inst
 
+      if type == 'constructor'
+        n_fields = class_table.count_by_kind('field')
+        alloc(n_fields)
+      end
+
       statements = child_by_name(body_ast, 'statements')[:values]
       statements.each do |s|
         c_statement(s)
       end
+    end
+
+    def alloc(n_words)
+      push_instruction("push constant #{n_words}")
+      push_instruction('call Memory.alloc 1')
+      push_instruction('pop pointer 0')
     end
 
     def c_statement(ast)
@@ -236,8 +247,18 @@ module Jack
         push_instruction "push constant #{number}"
       elsif is_keyword_const
         keyword_const = drill_by_names(ast, %w[term keywordConstant keyword])[:value]
-        value = { 'true' => "1\nneg", 'false' => '0' }[keyword_const] || keyword_const
-        push_instruction "push constant #{value}"
+
+        case keyword_const
+        when 'true'
+          push_instruction 'push constant 1'
+          push_instruction 'neg'
+        when 'false'
+          push_instruction 'push constant 0'
+        when 'this'
+          push_instruction 'push pointer 0'
+        else
+          push_instruction "push constant #{keyword_const}"
+        end
       elsif is_var
         var = sub_exps[0][:values][0][:values][0][:values][0][:value]
         push_instruction "push #{c_symbol(var)}" # scar de symboltable
@@ -264,7 +285,8 @@ module Jack
 
     def c_symbol(symbol)
       symbol_data = subroutine_table[symbol] || class_table[symbol]
-      "#{symbol_data[:kind]} #{symbol_data[:index]}"
+      kind = symbol_data[:kind] == 'field' ? 'this' : symbol_data[:kind]
+      "#{kind} #{symbol_data[:index]}"
     end
 
     def map_operator(op, unary: false)
