@@ -160,20 +160,22 @@ module Jack
     end
 
     def c_subroutine_call(ast)
+      # pp ast
       address = %w[expressionList]
       expression_list_ast = drill_by_names(ast, address)
 
       address = %w[className identifier identifier]
-      class_name = drill_by_names(ast, address)[:value]
+      class_name = drill_by_names(ast, address)&.[](:value)
 
       address = %w[subroutineName identifier identifier]
-      subroutine_name = drill_by_names(ast, address)[:value]
+      subroutine_name = drill_by_names(ast, address)&.[](:value)
 
-      full_name = [class_name, subroutine_name].join('.')
+      full_name = [class_name, subroutine_name].compact.join('.')
+
+      return push_instruction "call #{full_name} 0" if expression_list_ast.nil?
 
       c_expression_list(expression_list_ast)
-      expressions_count = expression_list_ast[:values].count { |x| x[:value] != ',' }
-      argument_count = expressions_count
+      argument_count = expression_list_ast[:values].count { |x| x[:value] != ',' }
       push_instruction "call #{full_name} #{argument_count}"
     end
 
@@ -333,6 +335,8 @@ module Jack
     def drill_by_names(ast, names)
       current = ast
       names.each do |n|
+        next if current.nil?
+
         current = child_by_name(current, n)
       end
       current

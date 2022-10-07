@@ -5,7 +5,12 @@ path = ARGV.first
 compiler = Jack::Compiler.new(path)
 
 # puts compiler.internal_paths
-pp compiler.compile
+begin
+  pp compiler.compile
+rescue => exception
+  pp compiler.state[:instructions]
+  raise exception
+end
 # pp compiler.subroutine_table
 # pp compiler.class_table
 # pp compiler.class_table
