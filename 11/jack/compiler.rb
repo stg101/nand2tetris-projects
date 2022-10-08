@@ -170,8 +170,9 @@ module Jack
       push_instruction 'pop temp 0'
     end
 
-    def c_subroutine_call(ast)
-      # pp ast
+    # TODO : finish method dec implementation
+
+    def c_subroutine_call(ast) # TODO: handle object operations
       address = %w[expressionList]
       expression_list_ast = drill_by_names(ast, address)
 
@@ -182,12 +183,24 @@ module Jack
       subroutine_name = drill_by_names(ast, address)&.[](:value)
 
       full_name = [class_name, subroutine_name].compact.join('.')
+      argument_count = 0
 
-      return push_instruction "call #{full_name} 0" if expression_list_ast.nil?
+      if (object = find_in_tables(class_name))
+        full_name = [object[:type], subroutine_name].compact.join('.')
+        argument_count += 1
+        push_instruction "push #{c_symbol(class_name)}"
+      end
 
-      c_expression_list(expression_list_ast)
-      argument_count = expression_list_ast[:values].count { |x| x[:value] != ',' }
+      unless expression_list_ast.nil?
+        c_expression_list(expression_list_ast)
+        argument_count += expression_list_ast[:values].count { |x| x[:value] != ',' }
+      end
+
       push_instruction "call #{full_name} #{argument_count}"
+    end
+
+    def find_in_tables(symbol)
+      subroutine_table[symbol] || class_table[symbol]
     end
 
     def c_let_statement(ast) # TODO: argument variables
@@ -284,7 +297,7 @@ module Jack
     end
 
     def c_symbol(symbol)
-      symbol_data = subroutine_table[symbol] || class_table[symbol]
+      symbol_data = find_in_tables(symbol)
       kind = symbol_data[:kind] == 'field' ? 'this' : symbol_data[:kind]
       "#{kind} #{symbol_data[:index]}"
     end
@@ -329,7 +342,10 @@ module Jack
     def c_var_dec(table, ast)
       kind = ast[:values][0][:value]
       kind = 'local' if kind == 'var'
-      type = ast[:values][1][:values][0][:value]
+      address = %w[type className identifier identifier]
+      class_name = drill_by_names(ast, address)&.[](:value)
+
+      type = ast[:values][1][:values][0][:value] || class_name
       children_by_name(ast, 'varName').map do |vn|
         name = drill_by_names(vn, %w[identifier identifier])[:value]
         table.define(name: name, type: type, kind: kind)
