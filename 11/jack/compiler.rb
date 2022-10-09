@@ -19,15 +19,28 @@ module Jack
     end
 
     def compile
+      produce_bundle = internal_paths.length > 1
+      clear_file(bundle_path) if produce_bundle
+
       internal_paths.each do |path|
         file = File.open(path)
         vm_path = path.delete_suffix('.jack').concat('.vm')
         vm_code = compile_file(file).join("\n")
         File.open(vm_path, 'w') { |f| f.write vm_code }
+        File.open(bundle_path, 'a') { |f| f.write vm_code } if produce_bundle
       end
     end
 
     private
+
+    def clear_file(path)
+      File.open(path, 'w') {}
+    end
+
+    def bundle_path
+      main_path = internal_paths.find { |p| p.include? 'Main.jack' }
+      main_path.delete_suffix('Main.jack').concat('bundle.vm')
+    end
 
     def parse_internal_paths(path)
       return [path] unless File.directory?(path)
