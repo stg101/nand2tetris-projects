@@ -25,7 +25,7 @@ module Jack
       internal_paths.each do |path|
         file = File.open(path)
         vm_path = path.delete_suffix('.jack').concat('.vm')
-        vm_code = compile_file(file).join("\n")
+        vm_code = compile_file(file).join("\n").concat("\n")
         File.open(vm_path, 'w') { |f| f.write vm_code }
         File.open(bundle_path, 'a') { |f| f.write vm_code } if produce_bundle
       end
