@@ -77,12 +77,18 @@ module Jack
       end
 
       local_vars_count = subroutine_table.count_by_kind('local')
+      local_vars_count += 1 if type == 'method'
+
       inst = "function #{classname}.#{name} #{local_vars_count}"
       push_instruction inst
 
       if type == 'constructor'
         n_fields = class_table.count_by_kind('field')
         alloc(n_fields)
+      elsif type == 'method'
+        subroutine_table.define(name: 'this', type: classname, kind: 'argument')
+        push_instruction('push argument 0')
+        push_instruction('pop pointer 0')
       end
 
       statements = child_by_name(body_ast, 'statements')[:values]
