@@ -203,8 +203,12 @@ module Jack
 
       full_name = [class_name, subroutine_name].compact.join('.')
       argument_count = 0
-
-      if (object = find_in_tables(class_name))
+      if class_name.nil?
+        class_name = state[:classname]
+        full_name = [class_name, subroutine_name].join('.')
+        argument_count += 1
+        push_instruction 'push pointer 0'
+      elsif (object = find_in_tables(class_name))
         full_name = [object[:type], subroutine_name].compact.join('.')
         argument_count += 1
         push_instruction "push #{c_symbol(class_name)}"

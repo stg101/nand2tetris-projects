@@ -92,7 +92,8 @@ not
 if-goto L2while1
 call Keyboard.keyPressed 0
 pop local 0
-call moveSquare 0
+push pointer 0
+call SquareGame.moveSquare 1
 pop temp 0
 goto L1while1
 label L2while1
@@ -178,7 +179,8 @@ not
 if-goto L2while2
 call Keyboard.keyPressed 0
 pop local 0
-call moveSquare 0
+push pointer 0
+call SquareGame.moveSquare 1
 pop temp 0
 goto L1while2
 label L2while2

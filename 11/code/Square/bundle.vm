@@ -19,7 +19,8 @@ push argument 1
 pop this 1
 push argument 2
 pop this 2
-call draw 0
+push pointer 0
+call Square.draw 1
 pop temp 0
 push pointer 0
 return
@@ -84,13 +85,15 @@ lt
 and
 not
 if-goto L1if0
-call erase 0
+push pointer 0
+call Square.erase 1
 pop temp 0
 push this 2
 push constant 2
 add
 pop this 2
-call draw 0
+push pointer 0
+call Square.draw 1
 pop temp 0
 goto L2if0
 label L1if0
@@ -105,13 +108,15 @@ push constant 2
 gt
 not
 if-goto L1if1
-call erase 0
+push pointer 0
+call Square.erase 1
 pop temp 0
 push this 2
 push constant 2
 sub
 pop this 2
-call draw 0
+push pointer 0
+call Square.draw 1
 pop temp 0
 goto L2if1
 label L1if1
@@ -408,7 +413,8 @@ not
 if-goto L2while1
 call Keyboard.keyPressed 0
 pop local 0
-call moveSquare 0
+push pointer 0
+call SquareGame.moveSquare 1
 pop temp 0
 goto L1while1
 label L2while1
@@ -494,7 +500,8 @@ not
 if-goto L2while2
 call Keyboard.keyPressed 0
 pop local 0
-call moveSquare 0
+push pointer 0
+call SquareGame.moveSquare 1
 pop temp 0
 goto L1while2
 label L2while2
