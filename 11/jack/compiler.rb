@@ -19,7 +19,8 @@ module Jack
     end
 
     def compile
-      produce_bundle = internal_paths.length > 1
+      # produce_bundle = internal_paths.length > 1
+      produce_bundle = false
       clear_file(bundle_path) if produce_bundle
 
       internal_paths.each do |path|
