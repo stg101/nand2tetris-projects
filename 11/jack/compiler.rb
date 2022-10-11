@@ -231,6 +231,27 @@ module Jack
       # pp '******'
       # pp ast
 
+      is_array_assignment = ast[:values][2][:value] == '[' && ast[:values][4][:value] == ']'
+      return c_array_assignment(ast) if is_array_assignment
+
+      c_simple_assignment(ast)
+    end
+
+    def c_array_assignment(ast)
+      symbol = drill_by_names(ast, %w[varName identifier identifier])[:value]
+      index_expression = ast[:values][3]
+      value_expression = ast[:values][6]
+      push_instruction "push #{c_symbol(symbol)}"
+      c_expression index_expression
+      push_instruction 'add'
+      c_expression value_expression
+      push_instruction 'pop temp 0'
+      push_instruction 'pop pointer 1'
+      push_instruction 'push temp 0'
+      push_instruction 'pop that 0'
+    end
+
+    def c_simple_assignment(ast)
       values = ast[:values]
       expression = values[3]
       c_expression(expression)
@@ -249,6 +270,7 @@ module Jack
       end
     end
 
+    # TODO: add array access expresion
     def c_expression(ast)
       # pp '-----------'
       # pp ast
@@ -276,6 +298,12 @@ module Jack
       is_var = exp_n == 1 &&
                sub_exps[0][:values].length == 1 &&
                sub_exps[0][:values][0][:name] == 'varName'
+      is_array_access = exp_n == 1 &&
+                        sub_exps[0][:values].length == 4 &&
+                        sub_exps[0][:values][0][:name] == 'varName' &&
+                        sub_exps[0][:values][1][:value] == '[' &&
+                        sub_exps[0][:values][3][:value] == ']'
+
       is_combo = exp_n >= 3 &&
                  sub_exps[1][:name] == 'op'
 
@@ -296,6 +324,14 @@ module Jack
         else
           push_instruction "push constant #{keyword_const}"
         end
+      elsif is_array_access
+        symbol = drill_by_names(ast, %w[term varName identifier identifier])[:value]
+        expression = drill_by_names(ast, %w[term expression])
+        push_instruction "push #{c_symbol(symbol)}"
+        c_expression(expression)
+        push_instruction 'add'
+        push_instruction 'pop pointer 1'
+        push_instruction 'push that 0'
       elsif is_var
         var = sub_exps[0][:values][0][:values][0][:values][0][:value]
         push_instruction "push #{c_symbol(var)}" # scar de symboltable
