@@ -53,6 +53,8 @@ module Jack
 
     def compile_file(file)
       state[:instructions] = []
+      class_table.refresh
+      subroutine_table.refresh
       parser = Parser.new(file, grammar_file)
       # parser.parse
       c_class(parser.parse[0])
@@ -99,6 +101,7 @@ module Jack
       if type == 'constructor'
         n_fields = class_table.count_by_kind('field')
         alloc(n_fields)
+        push_instruction('pop pointer 0')
       elsif type == 'method'
         subroutine_table.define(name: 'this', type: classname, kind: 'argument')
         push_instruction('push argument 0')
@@ -114,7 +117,6 @@ module Jack
     def alloc(n_words)
       push_instruction("push constant #{n_words}")
       push_instruction('call Memory.alloc 1')
-      push_instruction('pop pointer 0')
     end
 
     def c_statement(ast)
