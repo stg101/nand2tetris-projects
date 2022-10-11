@@ -368,6 +368,7 @@ module Jack
       { '-' => 'sub',
         '+' => 'add',
         '*' => 'call Math.multiply 2',
+        '/' => 'call Math.divide 2',
         '=' => 'eq',
         '>' => 'gt',
         '<' => 'lt',
