@@ -295,6 +295,7 @@ module Jack
       is_number = compare_simple_value.call(sub_exps, 'integerConstant')
       is_keyword_const = compare_simple_value.call(sub_exps, 'keywordConstant')
       is_subroutine_call = compare_simple_value.call(sub_exps, 'subroutineCall')
+      is_string = compare_simple_value.call(sub_exps, 'stringConstant')
       is_var = exp_n == 1 &&
                sub_exps[0][:values].length == 1 &&
                sub_exps[0][:values][0][:name] == 'varName'
@@ -324,6 +325,23 @@ module Jack
         else
           push_instruction "push constant #{keyword_const}"
         end
+      elsif is_string
+        str = drill_by_names(ast, %w[term stringConstant stringConstant])[:value]
+        chars = str.split('').map(&:ord)
+        push_instruction("push constant #{chars.length}")
+        push_instruction('call String.new 1')
+
+        chars.each do |c|
+          push_instruction("push constant #{c}")
+          push_instruction('call String.appendChar 2')
+        end
+
+        # push size
+        # call String.new 1
+        # push 56 #A
+        # call String.appendChar 2
+        # push 57 #B
+        # call String.appendChar 2
       elsif is_array_access
         symbol = drill_by_names(ast, %w[term varName identifier identifier])[:value]
         expression = drill_by_names(ast, %w[term expression])
