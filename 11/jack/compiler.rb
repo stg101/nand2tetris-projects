@@ -86,17 +86,7 @@ module Jack
       params_ast = child_by_name(ast, 'parameterList')
       var_decs = children_by_name(body_ast, 'varDec')
 
-      c_parameter_list(params_ast)
-
-      var_decs.each do |dec|
-        c_subroutine_var_dec(dec)
-      end
-
-      local_vars_count = subroutine_table.count_by_kind('local')
-      local_vars_count += 1 if type == 'method'
-
-      inst = "function #{classname}.#{name} #{local_vars_count}"
-      push_instruction inst
+      start_pos = state[:instructions].length # hacky can be improved
 
       if type == 'constructor'
         n_fields = class_table.count_by_kind('field')
@@ -107,6 +97,18 @@ module Jack
         push_instruction('push argument 0')
         push_instruction('pop pointer 0')
       end
+
+      c_parameter_list(params_ast)
+
+      var_decs.each do |dec|
+        c_subroutine_var_dec(dec)
+      end
+
+      local_vars_count = subroutine_table.count_by_kind('local')
+      local_vars_count += 1 if type == 'method'
+
+      inst = "function #{classname}.#{name} #{local_vars_count}"
+      state[:instructions].insert(start_pos, inst)
 
       statements = child_by_name(body_ast, 'statements')[:values]
       statements.each do |s|

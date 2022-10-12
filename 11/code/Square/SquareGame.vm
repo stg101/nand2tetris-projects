@@ -1,20 +1,20 @@
 function SquareGame.new 0
-push constant 5
+push constant 2
 call Memory.alloc 1
 pop pointer 0
 push constant 0
 push constant 0
 push constant 30
 call Square.new 3
-pop this 3
+pop this 0
 push constant 0
-pop this 4
+pop this 1
 push pointer 0
 return
 function SquareGame.dispose 1
 push argument 0
 pop pointer 0
-push this 3
+push this 0
 call Square.dispose 1
 pop temp 0
 push pointer 0
@@ -25,45 +25,45 @@ return
 function SquareGame.moveSquare 1
 push argument 0
 pop pointer 0
-push this 4
+push this 1
 push constant 1
 eq
 not
 if-goto L1if6
-push this 3
+push this 0
 call Square.moveUp 1
 pop temp 0
 goto L2if6
 label L1if6
 label L2if6
-push this 4
+push this 1
 push constant 2
 eq
 not
 if-goto L1if7
-push this 3
+push this 0
 call Square.moveDown 1
 pop temp 0
 goto L2if7
 label L1if7
 label L2if7
-push this 4
+push this 1
 push constant 3
 eq
 not
 if-goto L1if8
-push this 3
+push this 0
 call Square.moveLeft 1
 pop temp 0
 goto L2if8
 label L1if8
 label L2if8
-push this 4
+push this 1
 push constant 4
 eq
 not
 if-goto L1if9
-push this 3
+push this 0
 call Square.moveRight 1
 pop temp 0
 goto L2if9
@@ -113,7 +113,7 @@ push constant 90
 eq
 not
 if-goto L1if11
-push this 3
+push this 0
 call Square.decSize 1
 pop temp 0
 goto L2if11
@@ -124,7 +124,7 @@ push constant 88
 eq
 not
 if-goto L1if12
-push this 3
+push this 0
 call Square.incSize 1
 pop temp 0
 goto L2if12
@@ -136,7 +136,7 @@ eq
 not
 if-goto L1if13
 push constant 1
-pop this 4
+pop this 1
 goto L2if13
 label L1if13
 label L2if13
@@ -146,7 +146,7 @@ eq
 not
 if-goto L1if14
 push constant 2
-pop this 4
+pop this 1
 goto L2if14
 label L1if14
 label L2if14
@@ -156,7 +156,7 @@ eq
 not
 if-goto L1if15
 push constant 3
-pop this 4
+pop this 1
 goto L2if15
 label L1if15
 label L2if15
@@ -166,7 +166,7 @@ eq
 not
 if-goto L1if16
 push constant 4
-pop this 4
+pop this 1
 goto L2if16
 label L1if16
 label L2if16
