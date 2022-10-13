@@ -322,7 +322,7 @@ module Jack
         when 'true'
           push_instruction 'push constant 1'
           push_instruction 'neg'
-        when 'false'
+        when 'false', 'null'
           push_instruction 'push constant 0'
         when 'this'
           push_instruction 'push pointer 0'
